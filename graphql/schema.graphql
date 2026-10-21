@@ -1,0 +1,3488 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type ProfileViewModel {
+  id: ID!
+  name: String!
+  slug: String!
+}
+
+type UnityViewModel {
+  id: ID!
+  name: String!
+  floor: Float
+  condo_id: String!
+  block_id: String
+  condo: CondoViewModel!
+}
+
+type OccurrenceResponseViewModel {
+  id: ID!
+  response: String!
+  condominium_manager_id: String
+  occurrence_id: String!
+  files_url: [String!]
+  link: String
+  condominium_manager: PersonViewModel
+  occurrence: OccurrenceViewModel!
+}
+
+type CardCategoryCondominiumManagerViewModel {
+  id: ID!
+  category_id: String!
+  condominium_manager_id: String!
+}
+
+type KanbanCardCategoryViewModel {
+  id: ID!
+  name: String!
+  cardCategoriesCondominiumManager: [CardCategoryCondominiumManagerViewModel!]
+}
+
+type KanbanCardCommentViewModel {
+  id: ID!
+  content: String!
+  person_id: String!
+  kanban_card_id: String!
+  created_at: DateTime
+  person: PersonViewModel!
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type KanbanViewModel {
+  id: ID!
+  title: String
+  condominium_manager_id: String!
+  kanbanColumns: [KanbanColumnViewModel!]!
+  totalCards: Int!
+}
+
+type KanbanColumnViewModel {
+  id: ID!
+  name: String!
+  kanban_id: String!
+  position: Float!
+  column_type: String!
+  kanbanCards: [KanbanCardViewModel!]!
+  kanban: KanbanViewModel!
+}
+
+type KanbanCardViewModel {
+  id: ID!
+  title: String!
+  description: String!
+  responsible_id: String
+  category_id: String
+  priority: String!
+  condo_id: String!
+  kanban_column_id: String!
+  is_recurring_task: Boolean
+  file_urls: [String!]
+  before_file_urls: [String!]
+  start_date: DateTime
+  started_at: DateTime
+  completed_at: DateTime
+  week_day: Float
+  frequency: String
+  end_date: DateTime
+  due_date: DateTime
+  hour: String
+  recurrence_dates: [String!]
+  position: Float
+  isCommunicationSent: Boolean
+  occurrenceId: String
+  recurrence_series_id: String
+  started_by_person_id: String
+  updated_by_person_id: String
+  completed_by_person_id: String
+  created_at: DateTime
+  updated_at: DateTime
+  category: KanbanCardCategoryViewModel
+  responsible: PersonViewModel
+  startedByPerson: PersonViewModel
+  updatedByPerson: PersonViewModel
+  completedByPerson: PersonViewModel
+  condo: CondoViewModel!
+  comments: [KanbanCardCommentViewModel!]!
+  column: KanbanColumnViewModel!
+  occurrence: KanbanColumnViewModel
+}
+
+type PaginatedDoneCardsViewModel {
+  total: Float!
+  doneCards: [KanbanCardViewModel!]!
+}
+
+type PaginatedKanbanCardsToReportViewModel {
+  total: Float!
+  cards: [KanbanCardViewModel!]!
+}
+
+type OccurrenceViewModel {
+  id: ID!
+  person_name: String!
+  person_email: String!
+  person_phone: String!
+  who_are_you: String!
+  title: String!
+  description: String!
+  status: String!
+  category: String!
+  unity_id: String
+  block_id: String
+  condo_id: String!
+  files_url: [String!]
+  occurrence_at: DateTime
+  finishAt: DateTime
+  created_at: DateTime!
+  condo: CondoViewModel!
+  responses: [OccurrenceResponseViewModel!]!
+  cards: [KanbanCardViewModel!]
+}
+
+type BlockViewModel {
+  id: ID!
+  name: String!
+  number: Float
+  floors: Float
+  condo_id: String!
+  condo: CondoViewModel!
+  unities: [UnityViewModel!]
+}
+
+type PlaceTypeViewModel {
+  id: ID!
+  name: String!
+  slug: String!
+}
+
+type PlaceViewModel {
+  id: ID!
+  name: String!
+  place_type_id: String!
+  condo_id: String!
+  placesType: PlaceTypeViewModel!
+  condo: CondoViewModel!
+}
+
+type CondoStorageFolderViewModel {
+  id: ID!
+  name: String!
+  parent_path: String!
+  full_path: String!
+  condo_id: String!
+}
+
+type CondoAttachmentViewModel {
+  id: ID!
+  title: String!
+  type: CondoAttachmentType!
+  url: String!
+  folder_path: String
+  s3_key: String
+  condo_id: String!
+}
+
+"""Tipo do anexo do condomínio"""
+enum CondoAttachmentType {
+  COLLECTIVE_AGREEMENT
+  INTERNAL_REGULATIONS
+  DEFAULT
+}
+
+type PaginatedCondoAttachmentViewModel {
+  total: Float!
+  attachments: [CondoAttachmentViewModel!]!
+  folders: [CondoStorageFolderViewModel!]!
+}
+
+type NotesViewModel {
+  id: ID!
+  title: String!
+  description: String!
+  condo_id: String!
+  condo: CondoViewModel!
+}
+
+type PaginatedNotesViewModel {
+  total: Float!
+  notes: [NotesViewModel!]!
+}
+
+type CondoAddressViewModel {
+  id: ID!
+  name: String!
+  street: String!
+  number: String!
+  city: String!
+  zipCode: String!
+  state: String!
+  country: String!
+  longitude: Float!
+  latitude: Float!
+  condoId: String!
+  condo: CondoViewModel!
+}
+
+type CondoViewModel {
+  id: ID!
+  name: String!
+  phone: String!
+  document: String!
+  status: String!
+  created_by_person_id: String!
+  appeal_deadline_days: Int!
+  createdByPerson: PersonViewModel!
+  unities: [UnityViewModel!]
+  occurrences: [OccurrenceViewModel!]
+  blocks: [BlockViewModel!]
+  places: [PlaceViewModel!]
+  attachments: [CondoAttachmentViewModel!]
+  notes: [NotesViewModel!]
+  address: CondoAddressViewModel
+}
+
+type PersonContextViewModel {
+  id: ID!
+  status: String!
+  person_id: String!
+  profile_id: String!
+  parent_context_id: String
+  created_by_person_id: String!
+  condos_limit: Float
+  expiration_date: DateTime
+  created_at: DateTime!
+  profile: ProfileViewModel!
+  person: PersonViewModel!
+  personAccount: PersonAccountViewModel!
+  createdByPerson: PersonViewModel!
+  parentPerson: PersonViewModel!
+  personCondos: [CondoViewModel!]
+}
+
+type FeatureViewModel {
+  id: ID!
+  name: String!
+  slug: String!
+}
+
+type PersonPermissionViewModel {
+  id: ID!
+  person_id: String!
+  person_context_id: String!
+  profile_id: String!
+  feature_slug: String!
+  condo_id: String!
+  actions: [String!]!
+  condo: CondoViewModel!
+  feature: FeatureViewModel!
+  profile: ProfileViewModel!
+  person: PersonViewModel!
+}
+
+type PersonViewModel {
+  id: ID!
+  name: String!
+  phone: String!
+  document: String!
+  created_by_person_id: String!
+  person_function: String
+  onlyShowMyTasks: Boolean!
+  showPanel: Boolean!
+  excluded_at: DateTime
+  contexts: [PersonContextViewModel!]!
+  parentContexts: [PersonContextViewModel!]
+  personAccount: PersonAccountViewModel
+  permissions: [PersonPermissionViewModel!]
+}
+
+type PersonAccountViewModel {
+  id: ID!
+  email: String!
+  status: String!
+  person_id: String!
+  stripe_id: String
+  stripe_status: String
+  stripe_price_id: String
+  stripe_product_id: String
+  person: PersonViewModel!
+  contexts: [PersonContextViewModel!]!
+}
+
+type PersonAccountSession {
+  id: ID!
+  name: String!
+  phone: String!
+  document: String!
+  email: String!
+  status: String!
+  createdByPersonId: String
+  isEmployee: Boolean
+  permissionCondoId: String
+  personContext: [PersonContextViewModel!]!
+  stripeId: String
+  stripeStatus: String
+  stripePriceId: String
+  stripeProductId: String
+  showPanel: Boolean
+}
+
+type Auth {
+  person: PersonAccountSession!
+  token: String!
+  refreshToken: String!
+}
+
+type PersonInfo {
+  person: PersonAccountSession!
+}
+
+type RefreshTokensOutput {
+  accessToken: String!
+  refreshToken: String
+}
+
+type AnonymousReportResponseViewModel {
+  id: ID!
+  report_id: String!
+  condominium_manager_id: String
+  is_from_reporter: Boolean!
+  message: String!
+  files_url: [String!]
+  created_at: DateTime!
+  manager: PersonViewModel
+}
+
+type AnonymousReportViewModel {
+  id: ID!
+  protocol: String!
+  tracking_token: String!
+  condo_id: String!
+  status: AnonymousReportStatus!
+  category: AnonymousReportCategory!
+  urgency: AnonymousReportUrgency!
+  is_identified: Boolean!
+  reporter_name: String
+  reporter_email: String
+  reporter_phone: String
+  reporter_relation: String
+  reporter_block_id: String
+  reporter_unity_id: String
+  involved_block_id: String
+  involved_unity_id: String
+  location_details: String
+  title: String!
+  description: String!
+  incident_at: DateTime
+  files_url: [String!]
+  internal_notes: String
+  resolved_at: DateTime
+  created_at: DateTime!
+  updated_at: DateTime!
+  condo: CondoViewModel
+  reporterBlock: BlockViewModel
+  reporterUnity: UnityViewModel
+  involvedBlock: BlockViewModel
+  involvedUnity: UnityViewModel
+  responses: [AnonymousReportResponseViewModel!]
+  cards: [KanbanCardViewModel!]
+}
+
+enum AnonymousReportStatus {
+  OPEN
+  IN_REVIEW
+  FORWARDED_TO_AUTHORITIES
+  RESOLVED
+  DISMISSED
+}
+
+enum AnonymousReportCategory {
+  DOMESTIC_VIOLENCE
+  HARASSMENT
+  NOISE_DISTURBANCE
+  VANDALISM
+  FRAUD_OR_THEFT
+  PET_ABUSE
+  RULE_INFRACTION
+  OTHER
+}
+
+enum AnonymousReportUrgency {
+  LOW
+  MEDIUM
+  HIGH
+  EMERGENCY
+}
+
+type AnonymousReportsDashboardViewModel {
+  total: Int!
+  pending: Int!
+  inReview: Int!
+  forwardedToAuthorities: Int!
+  resolved: Int!
+  dismissed: Int!
+  domesticViolenceCount: Int!
+  emergencyCount: Int!
+}
+
+type OccurrenceAiTemplateViewModel {
+  id: ID!
+  code: String!
+  name: String!
+  body: String!
+  rendered_body: String!
+  category: String!
+}
+
+type OccurrenceAiAnalysisViewModel {
+  id: ID!
+  occurrence_id: String!
+  status: String!
+  category_suggested: String
+  category_confidence: Float
+  routine_probability: Float
+  low_value_probability: Float
+  attention_level: String
+  attention_confidence: Float
+  requires_human_review: Boolean!
+  template_id: String
+  template_confidence: Float
+  suggested_response: String
+  available_templates: [OccurrenceAiTemplateViewModel!]!
+  review_outcome: String
+  error_code: String
+  created_at: DateTime!
+}
+
+type AppliedOccurrenceAiSuggestionViewModel {
+  analysis: OccurrenceAiAnalysisViewModel!
+  rendered_response: String!
+  category: String
+}
+
+type CampaignResponsesViewModel {
+  id: ID!
+  campaign_id: String!
+  person_name: String
+  comment: String
+  block_id: String
+  unity_id: String
+  grade: String!
+  classification_person: String!
+  campaign: CampaignViewModel!
+}
+
+type NPSDataViewModel {
+  campaign_id: String!
+  campaign_name: String!
+  condo_id: String!
+  total_responses: Float!
+  detractors_count: Float!
+  promoters_count: Float!
+  neutral_count: Float!
+  nps_score: Float!
+  id: String!
+  type: String!
+}
+
+type CampaignViewModel {
+  id: ID!
+  name: String!
+  status: String!
+  link: String
+  observation: String
+  condo_id: String!
+  person_id: String!
+  condo: CondoViewModel!
+  campaignResponses: [CampaignResponsesViewModel!]!
+  person: PersonViewModel!
+  created_at: DateTime!
+  closing_date: DateTime!
+}
+
+type DeviceViewModel {
+  id: ID!
+  name: String!
+  description: String!
+  code: String
+  quantity: Float
+  value: Float
+  condition: String
+  supplier_id: String
+  responsible_id: String
+  state: Boolean
+  device_type_id: String!
+  place_id: String!
+  acquisition_date: DateTime
+  files_url: [String!]
+  condo: CondoViewModel!
+  place: PlaceViewModel!
+  responsible: PersonViewModel
+}
+
+type PatrolCheckpointViewModel {
+  id: ID!
+  patrol_id: String!
+  latitude: Float!
+  longitude: Float!
+  label: String
+  observations: String
+  recorded_at: DateTime!
+  created_at: DateTime!
+}
+
+type PatrolViewModel {
+  id: ID!
+  status: String!
+  condo_id: String!
+  responsible_id: String!
+  started_at: DateTime!
+  ended_at: DateTime
+  scheduled_at: DateTime
+  observations: String
+  created_at: DateTime!
+  condo: CondoViewModel
+  responsible: PersonViewModel
+  checkpoints: [PatrolCheckpointViewModel!]
+}
+
+type MovingSchedulePeriodViewModel {
+  startTime: String!
+  endTime: String!
+  slotDurationMinutes: Int!
+  capacity: Int!
+}
+
+type MovingScheduleDayRuleViewModel {
+  weekday: Int!
+  active: Boolean!
+  periods: [MovingSchedulePeriodViewModel!]!
+}
+
+type MovingScheduleConfigViewModel {
+  id: String!
+  condo_id: String!
+  weekly_rules: [MovingScheduleDayRuleViewModel!]!
+  is_active: Boolean!
+  created_at: DateTime!
+  updated_at: DateTime!
+}
+
+type MovingBlackoutViewModel {
+  id: String!
+  condo_id: String!
+  reason: String!
+  note: String
+  starts_at: DateTime!
+  ends_at: DateTime!
+  created_at: DateTime!
+}
+
+type MovingAvailableSlotViewModel {
+  startsAt: DateTime!
+  endsAt: DateTime!
+  available: Boolean!
+  remainingCapacity: Int!
+  totalCapacity: Int!
+}
+
+type MovingBookingViewModel {
+  id: String!
+  condo_id: String!
+  block_id: String
+  unity_id: String
+  person_name: String!
+  person_email: String!
+  person_phone: String!
+  who_are_you: String!
+  moving_type: String!
+  scheduled_at: DateTime!
+  duration_minutes: Int!
+  status: String!
+  notes: String
+  created_at: DateTime!
+  updated_at: DateTime!
+}
+
+type PackagePhotoViewModel {
+  id: String!
+  url: String!
+  position: Int!
+  created_at: DateTime!
+}
+
+type PackageEventViewModel {
+  id: String!
+  type: String!
+  actor_person_id: String
+  recipient_email: String
+  details: String
+  occurred_at: DateTime!
+}
+
+type PackageViewModel {
+  id: String!
+  condo_id: String!
+  block_id: String!
+  unity_id: String!
+  block_name: String
+  unity_name: String
+  recipient_name: String!
+  recipient_email: String!
+  code: String!
+  status: String!
+  registered_by_person_id: String!
+  registered_at: DateTime!
+  picked_up_at: DateTime
+  picked_up_by_person_id: String
+  picked_up_by_name: String
+  canceled_at: DateTime
+  canceled_by_person_id: String
+  cancellation_reason: String
+  derived_from_package_id: String
+  has_notification_attempt: Boolean!
+  waiting_minutes: Int!
+  photos: [PackagePhotoViewModel!]!
+  events: [PackageEventViewModel!]!
+  created_at: DateTime!
+  updated_at: DateTime!
+}
+
+type CondoResidentViewModel {
+  id: String!
+  condo_id: String!
+  block_id: String!
+  unity_id: String!
+  block_name: String
+  unity_name: String
+  name: String!
+  email: String!
+  phone: String!
+  ownership_type: String!
+  relationship: String
+  created_at: DateTime!
+  updated_at: DateTime!
+}
+
+type CondoResidentPageViewModel {
+  residents: [CondoResidentViewModel!]!
+  total_count: Int!
+  page: Int!
+  per_page: Int!
+  can_view_private: Boolean!
+}
+
+type CondoResidentObservationViewModel {
+  id: String!
+  author_person_id: String!
+  author_name: String
+  content: String!
+  created_at: DateTime!
+}
+
+type CondoResidentDocumentViewModel {
+  id: String!
+  file_name: String!
+  content_type: String!
+  size_bytes: Int!
+  created_at: DateTime!
+}
+
+type CondoResidentDetailsViewModel {
+  resident: CondoResidentViewModel!
+  can_view_private: Boolean!
+  documents: [CondoResidentDocumentViewModel!]!
+  observations: [CondoResidentObservationViewModel!]
+}
+
+type CondoResidentImportRowViewModel {
+  row_number: Int!
+  name: String!
+  email: String!
+  phone: String!
+  block: String!
+  unity: String!
+  ownership_type: String
+  errors: [String!]!
+}
+
+type CondoResidentImportResultViewModel {
+  rows: [CondoResidentImportRowViewModel!]!
+  valid_count: Int!
+  invalid_count: Int!
+  imported_count: Int!
+}
+
+type OccurrenceDashboardViewModel {
+  totalOccurrences: ID!
+  totalOpen: Float!
+  totalClosed: Float!
+  totalWithoutResponse: Float!
+  totalLastResponseWithoutManager: Float!
+  avgFirstResponseHours: Float
+  avgClosingHours: Float
+}
+
+type PriorityItemType {
+  id: String!
+  name: String!
+}
+
+type PrioritySurveyResultType {
+  item: String!
+  count: Float!
+}
+
+type BlockDataPrioritySurveyRespondedType {
+  id: String!
+  name: String!
+}
+
+type UnityDataPrioritySurveyRespondedType {
+  id: String!
+  name: String!
+}
+
+type PeopleDataPrioritySurveyRespondedType {
+  name: String
+  email: String
+  block: BlockDataPrioritySurveyRespondedType
+  unity: UnityDataPrioritySurveyRespondedType
+  priority_items: [PriorityItemType!]
+}
+
+type PrioritySurveyViewModel {
+  id: ID!
+  name: String!
+  status: String!
+  people_data_responded: [PeopleDataPrioritySurveyRespondedType!]
+  link: String
+  description: String
+  condo_id: String!
+  priority_items: [PriorityItemType!]!
+  condominium_manager_id: String!
+  condo: CondoViewModel!
+  results: [PrioritySurveyResultType!]
+  created_at: DateTime!
+  updated_at: DateTime!
+  excluded_at: DateTime
+  excluded_by: PersonViewModel
+  closing_date: DateTime!
+}
+
+type RealizationBudgetViewModel {
+  id: ID!
+  title: String!
+  description: String!
+  price: Float!
+  file_urls: [String!]
+  realization_id: String!
+  held_in: DateTime!
+}
+
+type RealizationViewModel {
+  id: ID!
+  title: String!
+  description: String!
+  topic: String!
+  cover_image_url: String!
+  file_urls: [String!]
+  condo_id: String!
+  condominium_manager_id: String!
+  held_in: DateTime
+  condo: CondoViewModel!
+  person: PersonViewModel!
+  budgets: [RealizationBudgetViewModel!]!
+  before_file_urls: [String!]!
+}
+
+type PaginatedRealizationsToReportViewModel {
+  total: Float!
+  data: [RealizationViewModel!]!
+}
+
+type ReactionViewModel {
+  id: ID!
+  name: String!
+  type: String!
+}
+
+type RealizationCommentReactionViewModel {
+  id: ID!
+  realization_comment_id: String!
+  reaction_id: String!
+  created_at: DateTime!
+  reaction: ReactionViewModel!
+  realizationComment: RealizationCommentViewModel!
+}
+
+type RealizationCommentViewModel {
+  id: ID!
+  person_name: String
+  comment: String!
+  is_sub_comment: Boolean!
+  parent_realization_comment_id: String
+  realization_id: String!
+  block_id: String
+  unity_id: String
+  created_at: DateTime!
+  block: BlockViewModel
+  unity: UnityViewModel
+  realizationCommentReactions: [RealizationCommentReactionViewModel!]
+  subRealizationComments: [RealizationCommentViewModel!]
+}
+
+type InformationType {
+  title: String!
+  description: String!
+}
+
+type ResumeViewModel {
+  id: ID!
+  name: String!
+  email: String!
+  city: String
+  phone: String
+  about: String
+  avatar_url: String!
+  skills: [InformationType!]!
+  experience: [InformationType!]!
+  education: [InformationType!]!
+  person_id: String!
+  person: PersonViewModel!
+}
+
+type BlockDataRespondedSurveyType {
+  id: String!
+  name: String!
+}
+
+type UnityDataRespondedSurveyType {
+  id: String!
+  name: String!
+}
+
+type PeopleDataRespondedSurveyType {
+  name: String!
+  email: String!
+  block: BlockDataRespondedSurveyType!
+  unity: UnityDataRespondedSurveyType!
+  answer: String!
+}
+
+type SurveyViewModel {
+  id: ID!
+  name: String!
+  status: String!
+  people_data_responded: [PeopleDataRespondedSurveyType!]!
+  link: String
+  accountant_yes: Float
+  accountant_no: Float
+  description: String
+  condo_id: String!
+  condominium_manager_id: String!
+  condo: CondoViewModel!
+  created_at: DateTime!
+  updated_at: DateTime!
+  excluded_at: DateTime
+  excluded_by: PersonViewModel
+  closing_date: DateTime!
+}
+
+type KanbanDashboardViewModel {
+  totalTasks: ID!
+  totalOpen: Float!
+  totalDone: Float!
+  totalDoing: Float!
+  totalExpired: Float!
+}
+
+type ContractViewModel {
+  id: ID!
+  start_date: DateTime!
+  period: Float!
+  value: Float!
+  condition_termination_of_contract: String
+  file_urls: [String!]!
+  readjustment_index: String!
+  status: String!
+  supplier_id: String!
+  condo_id: String!
+  condominium_manager_id: String!
+  condominiumManager: PersonViewModel!
+  condo: CondoViewModel!
+  supplier: SupplierViewModel!
+}
+
+type CounterViewModel {
+  active: Float!
+  inactive: Float!
+}
+
+type PaginatedContractsViewModel {
+  total: Float!
+  contracts: [ContractViewModel!]!
+}
+
+type SupplierAddressViewModel {
+  id: ID!
+  name: String!
+  street: String!
+  number: String
+  city: String!
+  zipCode: String!
+  state: String!
+  country: String!
+  longitude: Float!
+  latitude: Float!
+  supplierId: String!
+  supplier: SupplierViewModel!
+}
+
+type SupplierCategoryViewModel {
+  id: ID!
+  name: String!
+  slug: String!
+  description: String
+  created_at: DateTime!
+  excluded_at: DateTime
+}
+
+type SupplierSubCategoryViewModel {
+  id: ID!
+  name: String!
+  slug: String!
+  description: String
+  category_id: String!
+  category: SupplierCategoryViewModel
+  created_at: DateTime!
+  excluded_at: DateTime
+}
+
+type SupplierCategoryRelationViewModel {
+  id: String!
+  supplier_id: String!
+  category_id: String
+  sub_category_id: String
+  created_at: DateTime!
+  updated_at: DateTime!
+  excluded_at: DateTime
+  category: SupplierCategoryViewModel
+  subCategory: SupplierSubCategoryViewModel
+}
+
+type SupplierWorkViewModel {
+  id: ID!
+  title: String!
+  description: String
+  coverUrl: String
+  clientName: String
+  fileUrls: [String!]
+  supplierId: String!
+  condoId: String
+  condo: CondoViewModel
+}
+
+type SupplierRatingViewModel {
+  id: ID!
+  ratedById: String!
+  description: String
+  supplierId: String!
+  condoId: String
+  workId: String
+  rating: Int
+  ratedBy: PersonViewModel
+}
+
+type SupplierViewModel {
+  id: ID!
+  name: String!
+  company_name: String
+  created_by_person_id: String!
+  phone: String
+  document: String
+  contact_email: String
+  avatar_url: String
+  site: String
+  instagram: String
+  contracts: [ContractViewModel!]!
+  addresses: [SupplierAddressViewModel!]
+  supplierRelations: [SupplierCategoryRelationViewModel!]
+  supplierWorks: [SupplierWorkViewModel!]
+  supplierRatings: [SupplierRatingViewModel!]
+  createdPerson: PersonViewModel
+}
+
+type CondoSupplierViewModel {
+  id: ID!
+  supplier_id: String!
+  condo_id: String!
+  condo: CondoViewModel!
+  supplier: SupplierViewModel!
+}
+
+type NotificationResponseViewModel {
+  id: ID!
+  response: String!
+  condominium_manager_id: String
+  date: DateTime
+  notification_id: String!
+  files_url: [String!]
+  author_type: NotificationResponseAuthorType!
+  kind: NotificationResponseKind!
+  is_internal: Boolean!
+  resident_name: String
+  resident_email: String
+}
+
+enum NotificationResponseAuthorType {
+  MANAGER
+  ADMIN
+  RESIDENT
+}
+
+enum NotificationResponseKind {
+  COMMENT
+  APPEAL
+  APPEAL_RESOLUTION
+  INTERNAL_NOTE
+}
+
+type NotificationHasBeenReadType {
+  ip: String
+  date: DateTime
+}
+
+type CitedNotificationViewModel {
+  id: String!
+  title: String!
+  date: DateTime
+  status: NotificationStatus!
+  value: Float
+  is_it_a_fine: Boolean
+}
+
+enum NotificationStatus {
+  DRAFT
+  UNDER_ADMIN_REVIEW
+  PENDING_APPROVAL
+  APPROVED
+  SENT
+  IN_APPEAL
+  EFFECTIVE
+  CANCELLED
+}
+
+type NotificationHistorySummaryViewModel {
+  totalCount: Float!
+  effectiveCount: Float!
+  totalFineValue: Float!
+}
+
+type NotificationHistoryByUnityViewModel {
+  summary: NotificationHistorySummaryViewModel!
+  notifications: [CitedNotificationViewModel!]!
+}
+
+type NotificationViewModel {
+  id: ID!
+  title: String!
+  description: String
+  name: String!
+  email: String!
+  phone: String
+  link: String
+  is_it_a_fine: Boolean
+  was_read: Boolean
+  value: Float
+  condo_id: String!
+  unity_id: String!
+  block_id: String!
+  files_url: [String!]
+  signed_file: String
+  date: DateTime
+  hour: String
+  proof_has_been_read: NotificationHasBeenReadType
+  status: NotificationStatus!
+  occurrence_id: String
+  sent_at: DateTime
+  appeal_deadline_at: DateTime
+  cancelled_at: DateTime
+  effective_at: DateTime
+  approved_by_person_id: String
+  sent_by_person_id: String
+  cancelled_by_person_id: String
+  admin_review_requested_at: DateTime
+  is_within_appeal_period: Boolean!
+  days_left_in_appeal: Float
+  recurrence_count: Float!
+  cited_notifications: [CitedNotificationViewModel!]
+  condo: CondoViewModel!
+  responses: [NotificationResponseViewModel!]
+  block: BlockViewModel!
+  unity: UnityViewModel!
+}
+
+type PublicNotificationViewModel {
+  id: ID!
+  title: String!
+  description: String
+  name: String!
+  email: String!
+  is_it_a_fine: Boolean
+  value: Float
+  condo_id: String!
+  unity_id: String!
+  block_id: String!
+  status: NotificationStatus!
+  sent_at: DateTime
+  appeal_deadline_at: DateTime
+  is_within_appeal_period: Boolean!
+  days_left_in_appeal: Float
+  date: DateTime
+  hour: String
+  files_url: [String!]
+  signed_file: String
+  cited_notifications: [CitedNotificationViewModel!]
+  responses: [NotificationResponseViewModel!]
+  condo: CondoViewModel!
+  block: BlockViewModel!
+  unity: UnityViewModel!
+}
+
+type DocumentTemplateViewModel {
+  id: ID!
+  title: String!
+  description: String
+  category: DocumentTemplateCategory!
+  content: String!
+  visibility: DocumentTemplateVisibility!
+  hide_title_when_printed: Boolean!
+  is_active: Boolean!
+  owner_person_id: String!
+  created_by_person_id: String!
+  created_at: DateTime!
+  updated_at: DateTime!
+}
+
+enum DocumentTemplateCategory {
+  ADVERTENCIA
+  MULTA
+  CONVOCACAO
+  COMUNICADO
+  OUTROS
+}
+
+enum DocumentTemplateVisibility {
+  PRIVATE
+  SHARED
+}
+
+type DocumentTemplatePreviewViewModel {
+  templateId: String!
+  title: String!
+  originalContent: String!
+  renderedContent: String!
+  hideTitleWhenPrinted: Boolean!
+}
+
+type NotificationTemplateShortcutViewModel {
+  code: String!
+  label: String!
+}
+
+type NotificationBrandingSettingsViewModel {
+  id: ID!
+  condo_id: String!
+  logo_url: String
+  issuer_name: String
+  issuer_document: String
+  footer_text: String
+  primary_color: String
+}
+
+type ResidentPresentViewModel {
+  id: ID!
+  first_name: String!
+  last_name: String!
+  email: String!
+  phone: String!
+  assembly_id: String!
+  block_id: String!
+  unity_id: String!
+  ip: String!
+  block: BlockViewModel!
+  unity: UnityViewModel!
+}
+
+type QuestionVoteViewModel {
+  id: ID!
+  vote_type: String!
+  question_id: String!
+  resident_id: String!
+  resident: ResidentPresentViewModel!
+}
+
+type QuestionViewModel {
+  id: ID!
+  subject: String!
+  description: String
+  status: String!
+  assembly_id: String!
+  count_votes_in_favor: String
+  count_votes_against: String
+  votes: [QuestionVoteViewModel!]
+}
+
+type AssemblyRepresentativeViewModel {
+  id: ID!
+  name: String!
+  email: String!
+  phone: String!
+  assembly_id: String!
+  block_id: String
+  unity_id: String
+  role: String!
+  block: BlockViewModel
+  unity: UnityViewModel
+}
+
+type AssemblyViewModel {
+  id: ID!
+  title: String!
+  place: String
+  type: String!
+  first_call_date: DateTime!
+  first_call_hour: String!
+  second_call_date: DateTime
+  second_call_hour: String
+  condo_id: String!
+  ata: String
+  questions: [QuestionViewModel!]
+  representatives: [AssemblyRepresentativeViewModel!]!
+}
+
+type NotificationCenterViewModel {
+  id: ID!
+  title: String
+  content: String
+  type: String
+  redirect: String
+  recipient_id: String!
+  responsible_id: String
+  read_at: DateTime
+  created_at: DateTime!
+  recipient: PersonViewModel
+  responsible: PersonViewModel
+}
+
+type LogViewModel {
+  id: ID!
+  action: String!
+  resource: String!
+  person_id: String!
+  created_at: DateTime!
+  person: PersonViewModel!
+}
+
+type BlogAuthorViewModel {
+  id: ID!
+  name: String!
+  bio: String
+  photo_url: String
+  email: String
+  is_ai: Boolean!
+  created_at: DateTime!
+  updated_at: DateTime!
+  excluded_at: DateTime
+}
+
+type BlogCategoryViewModel {
+  id: ID!
+  name: String!
+  slug: String!
+  description: String
+  created_at: DateTime!
+  updated_at: DateTime!
+  excluded_at: DateTime
+}
+
+type BlogTagViewModel {
+  id: ID!
+  name: String!
+  slug: String!
+  description: String
+  created_at: DateTime!
+  updated_at: DateTime!
+  excluded_at: DateTime
+}
+
+type PlatformUsageOverviewViewModel {
+  condos: Int!
+  unidades: Int!
+  tarefas: Int!
+  ocorrencias: Int!
+  realizacoes: Int!
+  notificacoes: Int!
+  contratos: Int!
+  fornecedores: Int!
+  enquetes: Int!
+  nps: Int!
+  managers_count: Int!
+}
+
+type PlatformUsageManagerViewModel {
+  id: String!
+  sindico: String!
+  phone: String
+  email: String!
+  condos: Int!
+  unidades: Int!
+  tarefas: Int!
+  ocorrencias: Int!
+  realizacoes: Int!
+  notificacoes: Int!
+  contratos: Int!
+  fornecedores: Int!
+  enquetes: Int!
+  nps: Int!
+  last_login_at: DateTime
+  days_since_last_login: Int
+  stripe_status: String
+}
+
+type BlogPostViewModel {
+  id: ID!
+  title: String!
+  slug: String!
+  content: String!
+  summary: String
+  featured_image_url: String
+  status: String!
+  author_id: String!
+  author: BlogAuthorViewModel!
+  category_id: String
+  category: BlogCategoryViewModel
+  tags: [BlogTagViewModel!]!
+  published_at: DateTime
+  created_at: DateTime!
+  updated_at: DateTime!
+  excluded_at: DateTime
+}
+
+type RatingViewModel {
+  id: ID!
+  person_id: String!
+  rate: Int!
+  message: String
+  screen: String!
+  created_at: DateTime!
+  updated_at: DateTime!
+  excluded_at: DateTime
+}
+
+type ChecklistViewModel {
+  deviceId: String!
+  name: String!
+  quantity: Float!
+  observation: String
+  isOk: Boolean!
+}
+
+type BillingItemViewModel {
+  deviceId: String!
+  name: String!
+  quantity: Float!
+  value: Float!
+}
+
+type PlaceBillingViewModel {
+  id: ID!
+  placeChecklistId: String!
+  total: Float!
+  billingItems: [BillingItemViewModel!]!
+  placeChecklist: PlaceChecklistViewModel!
+}
+
+type PlaceChecklistViewModel {
+  id: ID!
+  description: String
+  placeId: String!
+  blockId: String
+  unityId: String
+  responsibleId: String
+  date: DateTime!
+  checklist: [ChecklistViewModel!]!
+  block: BlockViewModel
+  unity: UnityViewModel
+  place: PlaceViewModel!
+  billings: [PlaceBillingViewModel!]!
+}
+
+type InventoryEvidenceViewModel {
+  id: ID!
+  content_type: String!
+  size_bytes: Int!
+  created_at: DateTime!
+}
+
+type InventoryInspectionItemViewModel {
+  id: ID!
+  device_id: String
+  position: Int!
+  name: String!
+  expected_quantity: Int!
+  observed_quantity: Int
+  affected_quantity: Int
+  replacement_unit_value_cents: Int
+  result: InventoryInspectionResult!
+  issue_type: InventoryIssueType
+  observation: String
+  evidence: [InventoryEvidenceViewModel!]!
+}
+
+enum InventoryInspectionResult {
+  PENDING
+  CONFORMING
+  NONCONFORMING
+}
+
+enum InventoryIssueType {
+  MISSING
+  DAMAGED
+  DIRTY
+  OTHER
+}
+
+type InventoryInspectionSignatureViewModel {
+  id: ID!
+  signer_name: String!
+  statement_version: String!
+  signed_payload_hash: String!
+  signed_at: DateTime!
+}
+
+type InventoryInspectionViewModel {
+  id: ID!
+  place_id: String!
+  condo_id: String!
+  place_name: String!
+  type: InventoryInspectionType!
+  status: InventoryInspectionStatus!
+  signoff_status: InventorySignoffStatus!
+  resident_id: String
+  resident_name: String
+  block_id: String
+  unity_id: String
+  recipient_name: String
+  recipient_email: String
+  send_receipt: Boolean!
+  performed_by_name: String
+  version: Int!
+  started_at: DateTime!
+  completed_at: DateTime
+  items: [InventoryInspectionItemViewModel!]!
+  signature: InventoryInspectionSignatureViewModel
+}
+
+enum InventoryInspectionType {
+  HANDOVER
+  RETURN
+  ROUTINE
+}
+
+enum InventoryInspectionStatus {
+  DRAFT
+  IN_PROGRESS
+  AWAITING_SIGNATURE
+  COMPLETED
+  CANCELED
+}
+
+enum InventorySignoffStatus {
+  PENDING
+  SIGNED
+  REFUSED
+  WAIVED
+}
+
+type DuplicatePlaceInventoryResultViewModel {
+  copied: Int!
+  skipped: Int!
+}
+
+type Query {
+  getBlocksByCondo(condo_id: String!): [BlockViewModel!]!
+  getBlockById(id: String!): BlockViewModel!
+  getCampaignById(id: String!): CampaignViewModel!
+  listCampaignByPersonId(person_id: String!): [CampaignViewModel!]!
+  listCampaignsByCondoId(condo_id: String!): [CampaignViewModel!]!
+  listCampaignResponsesByCampaignId(campaign_id: String!): [CampaignResponsesViewModel!]!
+  getNPSByCondominiumManager(condominium_manager_id: String!): [NPSDataViewModel!]!
+  devicesByCondo(condo: String!): [DeviceViewModel!]!
+  getPatrolById(patrol_id: String!): PatrolViewModel!
+  listPatrolsByCondo(input: ListPatrolsInput!): [PatrolViewModel!]!
+  getMovingScheduleConfigByCondo(condo_id: String!): MovingScheduleConfigViewModel
+  listMovingBlackoutsByCondo(condo_id: String!, starts_after: DateTime, starts_before: DateTime): [MovingBlackoutViewModel!]!
+  getAvailableMovingSlots(condo_id: String!, date: String!): [MovingAvailableSlotViewModel!]!
+  getMovingBookingById(booking_id: String!): MovingBookingViewModel!
+  listMovingBookingsByCondo(input: ListMovingBookingsInput!): [MovingBookingViewModel!]!
+  listPackages(input: ListPackagesInput!): [PackageViewModel!]!
+  getPackage(package_id: String!): PackageViewModel!
+  listCondoResidents(input: ListCondoResidentsInput!): CondoResidentPageViewModel!
+  getCondoResident(resident_id: String!): CondoResidentDetailsViewModel!
+  fetchAnonymousReportsByCondominiumManager(person_id: String!, employee_id: String, condo_id: String, status: String, category: String): [AnonymousReportViewModel!]!
+  listAnonymousReportsByCondo(condo_id: String!, status: String): [AnonymousReportViewModel!]!
+  getAnonymousReportById(id: String!): AnonymousReportViewModel!
+  getAnonymousReportByProtocol(protocol: String!, tracking_token: String): AnonymousReportViewModel!
+  getAnonymousReportsDashboard(person_id: String!, employee_id: String, condo_id: String): AnonymousReportsDashboardViewModel!
+  listAnonymousReportResponses(report_id: String!): [AnonymousReportResponseViewModel!]!
+  listPendingOccurrencesByCondominiumManagerId(person_id: String!): [OccurrenceViewModel!]!
+  listOccurrencesByCondo(condo_id: String!): [OccurrenceViewModel!]!
+  listPendingOccurrencesByCondo(condo_id: String!): [OccurrenceViewModel!]!
+  fetchOccurrencesByCondominiumManager(person_id: String!, status: String!): [OccurrenceViewModel!]!
+  getOccurrenceById(id: String!): OccurrenceViewModel!
+  getOccurrenceDashboard(person_id: String!, employee_id: String, condo_id: String): OccurrenceDashboardViewModel!
+  listOccurrenceResponsesByOccurrenceId(occurrence_id: String!): [OccurrenceResponseViewModel!]!
+  getLatestOccurrenceAiAnalysis(occurrenceId: String!): OccurrenceAiAnalysisViewModel
+  getPersonsByCreatedBy(created_by_person_id: String!, include_excluded: Boolean = false): [PersonViewModel!]!
+  getRelatedPersonsByUserId(user_id: String!): [PersonViewModel!]!
+  personAccountByPersonId(person_id: String!): PersonAccountViewModel!
+  contextById(id: String!): PersonContextViewModel!
+  contextsByPerson(person_id: String!): [PersonContextViewModel!]!
+  getSubscriptionsPersonContext: [PersonContextViewModel!]!
+  getCondoById(condo_id: String!): CondoViewModel!
+  getCondosByPerson(person_id: String!): [CondoViewModel!]!
+  fetchCondosPersonHasAccess(person_id: String!, created_by_person_id: String!): [CondoViewModel!]!
+  placesByCondo(condo_id: String!): [PlaceViewModel!]!
+  placesType: [PlaceTypeViewModel!]!
+  getPlacesTypeBySlug(slug: String!): PlaceTypeViewModel!
+  getPrioritySurveyById(id: String!): PrioritySurveyViewModel!
+  listPrioritySurveyByCondominiumManagerId(person_id: String!): [PrioritySurveyViewModel!]!
+  listPrioritySurveyByCondoId(condo_id: String!): [PrioritySurveyViewModel!]!
+  listPendingPrioritySurveyByCondominiumManagerId(person_id: String!): [PrioritySurveyViewModel!]!
+  getPrioritySurveyResults(priority_survey_id: String!): [PrioritySurveyViewModel!]!
+  getProfileBySlug(slug: String!): ProfileViewModel!
+  listRealizationsByPersonId(person_id: String!): [RealizationViewModel!]!
+  fetchRealizationsToPanel(person_id: String!): [RealizationViewModel!]!
+  fetchRealizationsToReport(personId: String!, condoId: String!, startDate: String!, endDate: String!, page: Float!): PaginatedRealizationsToReportViewModel!
+  fetchRealizationsByCondo(condo_id: String!): [RealizationViewModel!]!
+  getRealizationById(realization_id: String!): RealizationViewModel!
+  getRealizationBudgetById(realization_budget_id: String!): RealizationBudgetViewModel!
+  getRealizationCommentById(realization_comment_id: String!): RealizationCommentViewModel!
+  getRealizationCommentsByParent(parent_realization_comment_id: String!): [RealizationCommentViewModel!]!
+  getRealizationCommentsByRealization(realization_id: String!): [RealizationCommentViewModel!]!
+  getRealizationCommentReactionById(realization_comment_reaction_id: String!): RealizationCommentReactionViewModel!
+  getRealizationCommentReactionsByComment(realization_comment_id: String!): [RealizationCommentReactionViewModel!]!
+  getRealizationCommentReactionsByReaction(reaction_id: String!): [RealizationCommentReactionViewModel!]!
+  getResumeByPersonId(person_id: String!): ResumeViewModel!
+  getResumeById(id: String!): ResumeViewModel!
+  getSurveyById(id: String!): SurveyViewModel!
+  listPendingSurveyByCondominiumManagerId(person_id: String!): [SurveyViewModel!]!
+  listSurveyByCondominiumManagerId(person_id: String!): [SurveyViewModel!]!
+  listSurveyByCondoId(condo_id: String!): [SurveyViewModel!]!
+  getUnityById(id: String!): UnityViewModel!
+  unitiesByCondo(condo_id: String!): [UnityViewModel!]!
+  getKanbanById(kanban_id: String!): KanbanViewModel!
+  getKanbanDashboard(person_id: String!, employee_id: String): KanbanDashboardViewModel!
+  getKanbansByCondominiumManager(condominium_manager_id: String!): [KanbanViewModel!]
+  getKanbanColumnById(kanban_column_id: String!): KanbanColumnViewModel!
+  getKanbanColumnsByKanbanId(kanban_id: String!): [KanbanColumnViewModel!]!
+  getKanbanCardById(kanban_card_id: String!): KanbanCardViewModel!
+  kanbanCardRecurrenceTimeline(cardId: String!): [KanbanCardViewModel!]!
+  getKanbanCardsByColumn(column_id: String!): [KanbanCardViewModel!]!
+  getKanbanCardsByKanban(kanban_id: String!, startDate: String!, endDate: String!, condo_id: String!, title: String!): [KanbanCardViewModel!]!
+  fetchDoneKanbanCards(personId: String!, condoId: String!, responsible: String!, title: String!, startDate: String!, endDate: String!, page: Float!): PaginatedDoneCardsViewModel!
+  fetchKanbanCardsToReport(personId: String!, condoId: String!, responsible: String!, categoryId: String!, columnId: String!, startDate: String!, endDate: String!, page: Float!): PaginatedKanbanCardsToReportViewModel!
+  fetchKanbanCardsByDeadline(personId: String!, employeeId: String, date: String!, isOverdue: Boolean): [KanbanCardViewModel!]!
+  getKanbanCardCommentById(kanban_card_comment_id: String!): KanbanCardCommentViewModel!
+  getKanbanCardCommentsByKanbanCard(kanban_card_id: String!): [KanbanCardCommentViewModel!]!
+  getKanbanCardCommentsByPerson(person_id: String!): [KanbanCardCommentViewModel!]!
+  getKanbanCardCategoryById(kanban_card_category_id: String!): KanbanCardCategoryViewModel!
+  getKanbanCardCategoryByName(kanban_card_category_name: String!): KanbanCardCategoryViewModel!
+  getKanbanCardCategoriesByCondominiumManager(condominium_manager_id: String!): [KanbanCardCategoryViewModel!]!
+  getCardCategoryCondominiumManagerById(card_category_condominium_manager_id: String!): CardCategoryCondominiumManagerViewModel!
+  getCardCategoryCondominiumManagerByCategoryId(category_id: String!): [CardCategoryCondominiumManagerViewModel!]!
+  getAllSuppliers: [SupplierViewModel!]!
+  getSuppliersByPerson(person_id: String!): [SupplierViewModel!]!
+  getSupplierByPerson(person_id: String!): SupplierViewModel!
+  filterSuppliersByCategories(categoryIds: [String!], subcategoryIds: [String!]): [SupplierViewModel!]!
+  getSupplierById(supplier_id: String!): SupplierViewModel!
+  getSupplierByDocument(document: String!): SupplierViewModel!
+  getSupplierByEmail(email: String!): SupplierViewModel!
+  getAllSupplierCategories: [SupplierCategoryViewModel!]!
+  getSupplierCategoryById(id: String!): SupplierCategoryViewModel!
+  getSupplierCategoryBySlug(slug: String!): SupplierCategoryViewModel!
+  getAllSupplierSubCategories: [SupplierSubCategoryViewModel!]!
+  getSupplierSubCategoriesByCategoryId(category_id: String!): [SupplierSubCategoryViewModel!]!
+  getSupplierSubCategoryById(id: String!): SupplierSubCategoryViewModel!
+  getSupplierSubCategoryBySlug(slug: String!): SupplierSubCategoryViewModel!
+  getSupplierCategoryRelationsBySupplier(supplier_id: String!): [SupplierCategoryRelationViewModel!]!
+  getSupplierWorksBySupplier(supplierId: String!): [SupplierWorkViewModel!]!
+  getSupplierRatingsBySupplier(supplierId: String!): [SupplierRatingViewModel!]!
+  getContractById(contract_id: String!): ContractViewModel!
+  getContractsByCondo(condo_id: String!): [ContractViewModel!]!
+  getContractsBySupplier(supplier_id: String!): [ContractViewModel!]!
+  getContractsByCondominiumManager(person_id: String!): [ContractViewModel!]!
+  fetchContractsByParams(personId: String!, condoId: String!, status: String!, readjustmentIndex: String!, supplier: String!, page: Float!): PaginatedContractsViewModel!
+  counterManyContractsByStatus(person_id: String!): CounterViewModel!
+  getCondoSupplierById(condo_supplier_id: String!): CondoSupplierViewModel!
+  getCondoSuppliersByCondo(condo_id: String!): [CondoSupplierViewModel!]!
+  getCondoSuppliersByManyCondos(condos_id: [String!]!): [CondoSupplierViewModel!]!
+  getCondoSuppliersBySupplier(supplier_id: String!): [CondoSupplierViewModel!]!
+  getCondoAttachmentsByCondo(condo_id: String!): [CondoAttachmentViewModel!]!
+  fetchCondoAttachmentsByParams(personId: String!, condoId: String!, page: Float!, folderPath: String): PaginatedCondoAttachmentViewModel!
+  getNotificationsByCondo(condo_id: String!): [NotificationViewModel!]!
+  getNotificationsByManyCondos(condos_id: [String!]!): [NotificationViewModel!]!
+  getNotificationHistoryByUnity(condo_id: String!, block_id: String!, unity_id: String!, exclude_notification_id: String): NotificationHistoryByUnityViewModel!
+  getNotificationById(notification_id: String!): NotificationViewModel!
+  getNotificationByAccessToken(access_token: String!): PublicNotificationViewModel!
+  fetchDocumentTemplates: [DocumentTemplateViewModel!]!
+  getDocumentTemplateById(template_id: String!): DocumentTemplateViewModel!
+  notificationTemplateShortcuts: [NotificationTemplateShortcutViewModel!]!
+  getNotificationBrandingSettings(condo_id: String!): NotificationBrandingSettingsViewModel
+  getNotificationResponsesByCondominiumManager(condominium_manager_id: String!): [NotificationResponseViewModel!]!
+  getNotificationResponsesByNotification(notification_id: String!): [NotificationResponseViewModel!]!
+  getNotificationResponseById(notification_response_id: String!): NotificationResponseViewModel!
+  fetchAllFeatures: [FeatureViewModel!]!
+  getFeatureBySlug(slug: String!): FeatureViewModel!
+  getFeatureById(feature_id: String!): FeatureViewModel!
+  getPersonPermissionById(person_permission_id: String!): PersonPermissionViewModel!
+  getPersonPermissionsByCondo(condo_id: String!): [PersonPermissionViewModel!]!
+  fetchPersonPermissionsByPerson(person_id: String!): [PersonPermissionViewModel!]!
+  getPersonPermissionByParams(data: GetPersonPermissionByParamsInput!): PersonPermissionViewModel!
+  getReactionByType(type: String!): ReactionViewModel!
+  getReactionById(reaction_id: String!): ReactionViewModel!
+  getAssembliesByCondo(condo_id: String!): [AssemblyViewModel!]!
+  getAssembliesByManyCondos(condos_id: [String!]!): [AssemblyViewModel!]!
+  getAssemblyById(id: String!): AssemblyViewModel!
+  getQuestionsByAssembly(assembly_id: String!): [QuestionViewModel!]!
+  getQuestionById(question_id: String!): QuestionViewModel!
+  getQuestionVotesByQuestion(question_id: String!): [QuestionVoteViewModel!]!
+  getQuestionVoteById(question_vote_id: String!): QuestionVoteViewModel!
+  getResidentsByAssembly(assembly_id: String!): [ResidentPresentViewModel!]!
+  getResidentById(resident_id: String!): ResidentPresentViewModel!
+  getRepresentativesByAssembly(assembly_id: String!): [AssemblyRepresentativeViewModel!]!
+  getAssemblyRepresentativesByRole(role: String!): [AssemblyRepresentativeViewModel!]!
+  getRepresentativeById(representative_id: String!): AssemblyRepresentativeViewModel!
+  getAssemblyRepresentativeByAssemblyAndRole(assembly_id: String!, role: String!): AssemblyRepresentativeViewModel!
+  fetchNotesByCondo(condo_id: String!): [NotesViewModel!]!
+  fetchNotesByParams(personId: String!, condoId: String!, page: Float!): PaginatedNotesViewModel!
+  fetchNotesByManyCondos(condos_id: [String!]!): [NotesViewModel!]!
+  getNoteById(note_id: String!): NotesViewModel!
+  fetchNotificationsByRecipient(recipient_id: String!): [NotificationCenterViewModel!]!
+  fetchNotifications(recipient_id: String!, page: Float!): [NotificationCenterViewModel!]!
+  getNotificationCenterById(notification_id: String!): NotificationCenterViewModel!
+  fetchLogsByPerson(person_id: String!): [LogViewModel!]!
+  getLogById(log_id: String!): LogViewModel!
+  notificationPublicKey: String!
+  platformUsageOverview(from: DateTime!, to: DateTime!): PlatformUsageOverviewViewModel!
+  platformUsageByManager(from: DateTime!, to: DateTime!, search: String, orderBy: String, orderDir: String): [PlatformUsageManagerViewModel!]!
+  blogAuthors: [BlogAuthorViewModel!]!
+  getBlogAuthorById(id: String!): BlogAuthorViewModel!
+  blogCategories: [BlogCategoryViewModel!]!
+  getBlogCategoryById(id: String!): BlogCategoryViewModel!
+  blogTags: [BlogTagViewModel!]!
+  getBlogTagById(id: String!): BlogTagViewModel!
+  blogPosts: [BlogPostViewModel!]!
+  blogPost(id: String!): BlogPostViewModel!
+  blogPostBySlug(slug: String!): BlogPostViewModel!
+  ratings(data: FindManyRatingsInput!): [RatingViewModel!]!
+  getRatingById(id: String!): RatingViewModel!
+  getRatingsByPersonId(person_id: String!): [RatingViewModel!]!
+  getCondoAddressById(condoAddressId: String!): CondoAddressViewModel!
+  getCondoAddressByCondo(condoId: String!): CondoAddressViewModel!
+  getSupplierAddressById(supplierAddressId: String!): SupplierAddressViewModel!
+  fetchSupplierAddressesBySupplier(supplierId: String!): [SupplierAddressViewModel!]!
+  inventoryInspection(inspection_id: String!): InventoryInspectionViewModel!
+  inventoryInspectionsByPlace(place_id: String!): [InventoryInspectionViewModel!]!
+  getPlaceCheckListById(placeChecklistId: String!): PlaceChecklistViewModel!
+  getPlaceCheckListsByCondo(condoId: String!): [PlaceChecklistViewModel!]!
+  getPlaceCheckListsByPlace(placeId: String!): [PlaceChecklistViewModel!]!
+  getPlaceBillingById(placeBillingId: String!): PlaceBillingViewModel!
+  getPlaceBillingsByCondo(condoId: String!): [PlaceBillingViewModel!]!
+  getPlaceBillingsByPlace(placeId: String!): [PlaceBillingViewModel!]!
+  getPlaceBillingsByPlaceChecklist(placeChecklistId: String!): [PlaceBillingViewModel!]!
+}
+
+input ListPatrolsInput {
+  condo_id: String!
+  status: String
+  responsible_id: String
+  started_after: DateTime
+  started_before: DateTime
+}
+
+input ListMovingBookingsInput {
+  condo_id: String!
+  status: String
+  block_id: String
+  unity_id: String
+  moving_type: String
+  scheduled_after: DateTime
+  scheduled_before: DateTime
+}
+
+input ListPackagesInput {
+  condo_id: String!
+  status: String
+  search: String
+}
+
+input ListCondoResidentsInput {
+  condo_id: String!
+  search: String
+  relationship: String
+  page: Int
+}
+
+input GetPersonPermissionByParamsInput {
+  person_id: String!
+  condo_id: String!
+  feature_slug: String!
+}
+
+input FindManyRatingsInput {
+  page: Int!
+  limit: Int!
+  person_id: String
+  screen: String
+}
+
+type Mutation {
+  createBlock(data: CreateBlockInput!): BlockViewModel!
+  createManyBlocks(data: CreateManyBlocksInput!): Boolean!
+  deleteBlock(id: String!): Boolean!
+  updateBlock(data: UpdateBlockInput!): BlockViewModel!
+  createCampaign(data: CreateCampaignInput!): CampaignViewModel!
+  closeCampaign(campaign_id: String!): Boolean!
+  deleteCampaign(campaign_id: String!): Boolean!
+  campaignResponse(data: CreateCampaignResponsesInput!): CampaignResponsesViewModel!
+  deleteCampaignResponse(campaign_response_id: String!): Boolean!
+  createDevice(data: CreateDeviceInput!): DeviceViewModel!
+  deleteDevice(data: DeleteDeviceInput!): Boolean!
+  updateDevice(data: UpdateDeviceInput!): DeviceViewModel!
+  startPatrol(input: StartPatrolInput!): PatrolViewModel!
+  addPatrolCheckpoint(input: AddPatrolCheckpointInput!): PatrolCheckpointViewModel!
+  endPatrol(input: EndPatrolInput!): PatrolViewModel!
+  updatePatrolStatus(input: UpdatePatrolStatusInput!): PatrolViewModel!
+  saveMovingScheduleConfig(input: SaveMovingScheduleConfigInput!): MovingScheduleConfigViewModel!
+  createMovingBlackout(input: CreateMovingBlackoutInput!): MovingBlackoutViewModel!
+  deleteMovingBlackout(input: DeleteMovingBlackoutInput!): Boolean!
+  createMovingBooking(input: CreateMovingBookingInput!): MovingBookingViewModel!
+  updateMovingBookingStatus(input: UpdateMovingBookingStatusInput!): MovingBookingViewModel!
+  cancelMovingBookingPublic(input: CancelMovingBookingPublicInput!): MovingBookingViewModel!
+  registerPackage(input: RegisterPackageInput!): PackageViewModel!
+  pickupPackage(input: PickupPackageInput!): PackageViewModel!
+  cancelPackage(input: CancelPackageInput!): PackageViewModel!
+  derivePackage(input: DerivePackageInput!): PackageViewModel!
+  createCondoResident(input: CreateCondoResidentInput!): CondoResidentViewModel!
+  updateCondoResident(input: UpdateCondoResidentInput!): CondoResidentViewModel!
+  deleteCondoResident(resident_id: String!): Boolean!
+  updateCondoResidentRelationship(input: UpdateCondoResidentRelationshipInput!): CondoResidentViewModel!
+  addCondoResidentObservation(input: AddCondoResidentObservationInput!): CondoResidentObservationViewModel!
+  deleteCondoResidentDocument(document_id: String!): Boolean!
+  previewCondoResidentImport(input: CondoResidentImportInput!): CondoResidentImportResultViewModel!
+  importCondoResidents(input: CondoResidentImportInput!): CondoResidentImportResultViewModel!
+  createAnonymousReport(data: CreateAnonymousReportInput!): AnonymousReportViewModel!
+  updateAnonymousReportStatus(data: UpdateAnonymousReportStatusInput!): AnonymousReportViewModel!
+  updateAnonymousReportInternalNotes(data: UpdateAnonymousReportInternalNotesInput!): AnonymousReportViewModel!
+  createAnonymousReportManagerResponse(data: CreateAnonymousReportManagerResponseInput!): AnonymousReportResponseViewModel!
+  createAnonymousReportPublicResponse(data: CreateAnonymousReportPublicResponseInput!): AnonymousReportResponseViewModel!
+  createOccurrence(data: CreateOccurrenceInput!): OccurrenceViewModel!
+  updateOccurrenceStatus(id: String!, status: String!): OccurrenceViewModel!
+  updateOccurrenceStatusToClosed(id: String!): OccurrenceViewModel!
+  updateOccurrence(data: UpdateOccurrenceInput!): OccurrenceViewModel!
+  createOccurrenceResponse(data: CreateOccurrenceResponseInput!): OccurrenceResponseViewModel!
+  analyzeOccurrenceWithAi(occurrenceId: String!, force: Boolean): OccurrenceAiAnalysisViewModel!
+  applyOccurrenceAiSuggestion(analysisId: String!, templateId: String): AppliedOccurrenceAiSuggestionViewModel!
+  reviewOccurrenceAiSuggestion(data: ReviewOccurrenceAiSuggestionInput!): OccurrenceAiAnalysisViewModel!
+  createPerson(data: CreatePersonInput!): PersonViewModel!
+  createEmployee(data: CreateEmployeeInput!): PersonViewModel!
+  registerPerson(data: RegisterPersonInput!): PersonViewModel!
+  updatePerson(data: UpdatePersonInput!): PersonViewModel!
+  updateEmployee(data: UpdateEmployeeInput!): PersonViewModel!
+  deletePerson(id: String!): Boolean!
+  restorePerson(id: String!): Boolean!
+  sendEmailToContactRequest(data: SendEmailToContactRequestInput!): Boolean!
+  activeOrInactivePersonAccount(person_id: String!): Boolean!
+  changePersonAccountPassword(data: ChangePersonAccountPasswordInput!): PersonAccountViewModel!
+  sendEmailToPersonAccountEmail(data: SendEmailToPersonAccountInput!): Boolean!
+  sendEmail(data: SendEmailInput!): Boolean!
+  resetPersonAccountPassword(data: ResetPersonAccountPasswordInput!): Boolean!
+  createPersonContext(data: CreatePersonContextInput!): PersonContextViewModel!
+  createSupplierContext(data: CreatePersonContextInput!): PersonContextViewModel!
+  deletePersonContext(context: String!): Boolean!
+  updatePersonContext(data: updatePersonContextInput!): PersonContextViewModel!
+  createCondo(data: CreateCondoInput!): CondoViewModel!
+  updateCondo(data: UpdateCondoInput!): CondoViewModel!
+  deleteCondo(condo_id: String!): Boolean!
+  createPlace(data: CreatePlaceInput!): PlaceViewModel!
+  deletePlace(data: DeletePlaceInput!): Boolean!
+  updatePlace(data: UpdatePlaceInput!): PlaceViewModel!
+  createPlaceType(data: CreatePlaceTypeInput!): PlaceTypeViewModel!
+  createPrioritySurvey(data: CreatePrioritySurveyInput!): PrioritySurveyViewModel!
+  createPrioritySurveyResponse(data: CreatePrioritySurveyResponseInput!): PrioritySurveyViewModel!
+  deletePrioritySurveyResponse(data: DeletePrioritySurveyInput!): PrioritySurveyViewModel!
+  closePrioritySurvey(priority_survey_id: String!): PrioritySurveyViewModel!
+  setPrioritySurveyExcluded(data: SetPrioritySurveyExcludedInput!): PrioritySurveyViewModel!
+  createProfile(data: CreateProfileInput!): ProfileViewModel!
+  createRealization(data: CreateRealizationInput!): RealizationViewModel!
+  updateRealization(data: UpdateRealizationInput!): RealizationViewModel!
+  deleteRealization(realization_id: String!): Boolean!
+  createRealizationBudget(data: CreateRealizationBudgetInput!): RealizationBudgetViewModel!
+  updateRealizationBudget(data: UpdateRealizationBudgetInput!): RealizationBudgetViewModel!
+  deleteRealizationBudget(realization_budget_id: String!): Boolean!
+  createRealizationComment(data: CreateRealizationCommentInput!): RealizationCommentViewModel!
+  createSubRealizationComment(data: CreateSubRealizationCommentInput!): RealizationCommentViewModel!
+  updateRealizationComment(data: UpdateRealizationCommentInput!): RealizationCommentViewModel!
+  deleteRealizationComment(realization_comment_id: String!): Boolean!
+  createRealizationCommentReaction(data: CreateRealizationCommentReactionInput!): RealizationCommentReactionViewModel!
+  updateRealizationCommentReaction(data: UpdateRealizationCommentReactionInput!): RealizationCommentReactionViewModel!
+  deleteRealizationCommentReaction(realization_comment_reaction_id: String!): Boolean!
+  createOrUpdateResume(data: CreateOrUpdateResumeInput!): ResumeViewModel!
+  createSurvey(data: CreateSurveyInput!): SurveyViewModel!
+  createSurveyResponse(data: CreateSurveyResponseInput!): SurveyViewModel!
+  deleteSurveyResponse(data: DeleteSurveyInput!): SurveyViewModel!
+  closeSurvey(survey_id: String!): SurveyViewModel!
+  setSurveyExcluded(data: SetSurveyExcludedInput!): SurveyViewModel!
+  createUnity(data: CreateUnityInput!): UnityViewModel!
+  createUnities(data: CreateUnitiesInput!): Boolean!
+  createUnitiesInFloor(data: CreateUnitiesInFloorInput!): [UnityViewModel!]!
+  deleteUnity(id: String!): Boolean!
+  updateUnity(data: UpdateUnityInput!): UnityViewModel!
+  assignUnityToBlock(data: AssignUnityToBlockInput!): UnityViewModel!
+  createKanban(condominium_manager_id: String!): KanbanViewModel!
+  createNewBoard(title: String!, condominiumManagerId: String!): KanbanViewModel!
+  createKanbanColumn(data: CreateKanbanColumnInput!): KanbanColumnViewModel!
+  createKanbanColumns(condominium_manager_id: String!): [KanbanColumnViewModel!]!
+  updateKanbanColumn(data: UpdateKanbanColumnInput!): KanbanColumnViewModel!
+  deleteKanbanColumn(kanban_column_id: String!): Boolean!
+  createKanbanCard(data: CreateKanbanCardInput!): KanbanCardViewModel!
+  duplicateKanbanCard(data: DuplicateKanbanCardInput!): KanbanCardViewModel!
+  updateKanbanCard(data: UpdateKanbanCardInput!): KanbanCardViewModel!
+  deleteKanbanCard(kanban_card_id: String!): Boolean!
+  deleteRecurrentKanbanCard(data: DeleteRecurrentKanbanCardInput!): Boolean!
+  createKanbanCardComment(data: CreateKanbanCardCommentInput!): KanbanCardCommentViewModel!
+  updateKanbanCardComment(data: UpdateKanbanCardCommentInput!): KanbanCardCommentViewModel!
+  deleteKanbanCardComment(kanban_card_comment_id: String!): Boolean!
+  createKanbanCardCategory(data: CreateKanbanCardCategoryInput!): KanbanCardCategoryViewModel!
+  updateKanbanCardCategory(data: UpdateKanbanCardCategoryInput!): KanbanCardCategoryViewModel!
+  createCardCategoryCondominiumManager(data: CreateCardCategoryCondominiumManagerInput!): CardCategoryCondominiumManagerViewModel!
+  deleteCardCategoryCondominiumManager(data: DeleteCardCategoryCondominiumManagerInput!): Boolean!
+  createSupplier(data: CreateSupplierInput!): SupplierViewModel!
+  updateSupplier(data: UpdateSupplierInput!): SupplierViewModel!
+  deleteSupplier(data: DeleteSupplierInput!): Boolean!
+  createSupplierCategory(data: CreateSupplierCategoryInput!): SupplierCategoryViewModel!
+  updateSupplierCategory(data: UpdateSupplierCategoryInput!): SupplierCategoryViewModel!
+  deleteSupplierCategory(data: DeleteSupplierCategoryInput!): Boolean!
+  createSupplierSubCategory(data: CreateSupplierSubCategoryInput!): SupplierSubCategoryViewModel!
+  updateSupplierSubCategory(data: UpdateSupplierSubCategoryInput!): SupplierSubCategoryViewModel!
+  deleteSupplierSubCategory(data: DeleteSupplierSubCategoryInput!): Boolean!
+  createSupplierCategoryRelation(data: CreateSupplierCategoryRelationInput!): SupplierCategoryRelationViewModel!
+  updateSupplierCategoryRelation(data: UpdateSupplierCategoryRelationInput!): SupplierCategoryRelationViewModel!
+  deleteSupplierCategoryRelation(data: DeleteSupplierCategoryRelationInput!): Boolean!
+  createSupplierWork(data: CreateSupplierWorkInput!): SupplierWorkViewModel!
+  updateSupplierWork(data: UpdateSupplierWorkInput!): SupplierWorkViewModel!
+  deleteSupplierWork(data: DeleteSupplierWorkInput!): Boolean!
+  createSupplierRating(data: CreateSupplierRatingInput!): SupplierRatingViewModel!
+  updateSupplierRating(data: UpdateSupplierRatingInput!): SupplierRatingViewModel!
+  createContract(data: CreateContractInput!): ContractViewModel!
+  updateContract(data: UpdateContractInput!): ContractViewModel!
+  inactiveContract(contract_id: String!, status: String!): ContractViewModel!
+  deleteContract(contract_id: String!): Boolean!
+  createCondoSupplier(data: CreateCondoSupplierInput!): CondoSupplierViewModel!
+  createCondoAttachment(data: CreateCondoAttachmentInput!): CondoAttachmentViewModel!
+  updateCondoAttachment(data: UpdateCondoAttachmentInput!): CondoAttachmentViewModel!
+  deleteCondoAttachment(condo_attachment_id: String!): Boolean!
+  createCondoStorageFolder(data: CreateCondoStorageFolderInput!): CondoStorageFolderViewModel!
+  createNotification(data: CreateNotificationInput!): NotificationViewModel!
+  createNotificationFromOccurrence(data: CreateNotificationFromOccurrenceInput!): NotificationViewModel!
+  submitNotificationForAdminReview(data: SubmitNotificationForAdminReviewInput!): NotificationViewModel!
+  finishAdminReview(data: FinishAdminReviewInput!): NotificationViewModel!
+  returnNotificationForEdits(data: ReturnNotificationForEditsInput!): NotificationViewModel!
+  approveNotification(data: ApproveNotificationInput!): NotificationViewModel!
+  sendNotificationToResident(data: SendNotificationToResidentInput!): NotificationViewModel!
+  cancelNotification(data: CancelNotificationInput!): NotificationViewModel!
+  fileNotificationAppeal(data: FileNotificationAppealInput!): NotificationViewModel!
+  resolveNotificationAppeal(data: ResolveNotificationAppealInput!): NotificationViewModel!
+  updateNotification(data: UpdateNotificationInput!): NotificationViewModel!
+  deleteNotification(notification_id: String!): Boolean!
+  createDocumentTemplate(data: CreateDocumentTemplateInput!): DocumentTemplateViewModel!
+  updateDocumentTemplate(data: UpdateDocumentTemplateInput!): DocumentTemplateViewModel!
+  deleteDocumentTemplate(template_id: String!): Boolean!
+  renderDocumentTemplatePreview(data: RenderDocumentTemplatePreviewInput!): DocumentTemplatePreviewViewModel!
+  upsertNotificationBrandingSettings(data: UpsertNotificationBrandingInput!): NotificationBrandingSettingsViewModel!
+  createNotificationResponse(data: CreateNotificationResponseInput!): NotificationResponseViewModel!
+  updateNotificationResponse(data: UpdateNotificationResponseInput!): NotificationResponseViewModel!
+  deleteNotificationResponse(notification_response_id: String!): Boolean!
+  createFeature(data: CreateFeatureInput!): FeatureViewModel!
+  deleteFeature(feature_id: String!): Boolean!
+  updateFeature(data: UpdateFeatureInput!): FeatureViewModel!
+  createPersonPermission(data: CreatePersonPermissionInput!): PersonPermissionViewModel!
+  updatePersonPermission(data: UpdatePersonPermissionInput!): PersonPermissionViewModel!
+  deletePersonPermission(person_permission_id: String!): Boolean!
+  createReaction(data: CreateReactionInput!): ReactionViewModel!
+  createAssembly(data: CreateAssemblyInput!): AssemblyViewModel!
+  deleteAssembly(id: String!): Boolean!
+  updateAssembly(data: UpdateAssemblyInput!): AssemblyViewModel!
+  openQuestion(question_id: String!): QuestionViewModel!
+  closeQuestion(question_id: String!): QuestionViewModel!
+  createQuestion(data: CreateQuestionInput!): QuestionViewModel!
+  deleteQuestion(question_id: String!): Boolean!
+  updateQuestion(data: UpdateQuestionInput!): QuestionViewModel!
+  vote(data: VoteInput!): QuestionVoteViewModel!
+  deleteVote(question_vote_id: String!): Boolean!
+  updateVote(data: UpdateVoteInput!): QuestionVoteViewModel!
+  checkIn(data: CheckInInput!): ResidentPresentViewModel!
+  deleteResident(resident_id: String!): Boolean!
+  updateResident(data: UpdateResidentInput!): ResidentPresentViewModel!
+  createRepresentative(data: CreateAssemblyRepresentativeInput!): AssemblyRepresentativeViewModel!
+  deleteRepresentative(representative_id: String!): Boolean!
+  updateRepresentative(data: UpdateAssemblyRepresentativeInput!): AssemblyRepresentativeViewModel!
+  createNote(data: CreateNoteInput!): NotesViewModel!
+  updateNote(data: UpdateNoteInput!): NotesViewModel!
+  deleteNote(note_id: String!): Boolean!
+  sendNotification(data: SendNotificationInput!): NotificationCenterViewModel!
+  readNotification(notification_id: String!): NotificationCenterViewModel!
+  createLog(data: CreateLogInput!): LogViewModel!
+  subscribeToPushNotifications(subscription: SubscriptionInput!): Boolean!
+  getPersonInfoByToken(data: GetPersonInfoByTokenInput!): PersonInfo!
+  createSession(data: CreateAuthInput!): Auth!
+  signOut(personId: String!): Boolean!
+  refreshToken(data: RefreshTokensInput!): RefreshTokensOutput!
+  refreshTokenClientSide(data: RefreshTokenClientSideInput!): RefreshTokensOutput!
+  createBlogAuthor(data: CreateBlogAuthorInput!): BlogAuthorViewModel!
+  updateBlogAuthor(data: UpdateBlogAuthorInput!): BlogAuthorViewModel!
+  deleteBlogAuthor(id: String!): Boolean!
+  createBlogCategory(data: CreateBlogCategoryInput!): BlogCategoryViewModel!
+  updateBlogCategory(data: UpdateBlogCategoryInput!): BlogCategoryViewModel!
+  deleteBlogCategory(id: String!): Boolean!
+  createBlogTag(data: CreateBlogTagInput!): BlogTagViewModel!
+  updateBlogTag(data: UpdateBlogTagInput!): BlogTagViewModel!
+  deleteBlogTag(id: String!): Boolean!
+  createBlogPost(data: CreateBlogPostInput!): BlogPostViewModel!
+  updateBlogPost(data: UpdateBlogPostInput!): BlogPostViewModel!
+  deleteBlogPost(id: String!): Boolean!
+  createRating(data: CreateRatingInput!): RatingViewModel!
+  updateRating(data: UpdateRatingInput!): RatingViewModel!
+  deleteRating(id: String!): Boolean!
+  createCondoAddress(data: CreateCondoAddressInput!): CondoAddressViewModel!
+  updateCondoAddress(data: UpdateCondoAddressInput!): CondoAddressViewModel!
+  createSupplierAddress(data: CreateSupplierAddressInput!): SupplierAddressViewModel!
+  updateSupplierAddress(data: UpdateSupplierAddressInput!): SupplierAddressViewModel!
+  startInventoryInspection(input: StartInventoryInspectionInput!): InventoryInspectionViewModel!
+  updateInventoryInspectionItem(input: UpdateInventoryInspectionItemInput!): InventoryInspectionViewModel!
+  saveInventoryInspectionItems(input: SaveInventoryInspectionItemsInput!): InventoryInspectionViewModel!
+  requestInventoryInspectionSignoff(input: RequestInventoryInspectionSignoffInput!): InventoryInspectionViewModel!
+  duplicatePlaceInventory(input: DuplicatePlaceInventoryInput!): DuplicatePlaceInventoryResultViewModel!
+  createPlaceChecklist(data: CreatePlaceChecklistInput!): PlaceChecklistViewModel!
+  updatePlaceChecklist(data: UpdatePlaceChecklistInput!): PlaceChecklistViewModel!
+  deletePlaceChecklist(placeChecklistId: String!): Boolean!
+  createPlaceBilling(data: CreatePlaceBillingInput!): PlaceBillingViewModel!
+  updatePlaceBilling(data: UpdatePlaceBillingInput!): PlaceBillingViewModel!
+  deletePlaceBilling(placeBillingId: String!): Boolean!
+}
+
+input CreateBlockInput {
+  name: String!
+  condo_id: String!
+  floors: Float
+}
+
+input CreateManyBlocksInput {
+  name: String!
+  condo_id: String!
+  floors: Float
+  startValue: String!
+  endValue: String!
+}
+
+input UpdateBlockInput {
+  id: String!
+  name: String
+  floors: Float
+}
+
+input CreateCampaignInput {
+  name: String!
+  person_id: String!
+  observation: String
+  link: String
+  condo_id: String!
+  closing_date: DateTime!
+}
+
+input CreateCampaignResponsesInput {
+  person_name: String
+  block_id: String
+  unity_id: String
+  grade: String!
+  comment: String
+  campaign_id: String!
+}
+
+input CreateDeviceInput {
+  name: String!
+  description: String!
+  code: String
+  quantity: Float
+  value: Float
+  condition: String
+  supplier_id: String
+  responsible_id: String
+  files_url: [String!]
+  place_id: String!
+  acquisition_date: DateTime
+}
+
+input DeleteDeviceInput {
+  id: String!
+}
+
+input UpdateDeviceInput {
+  id: String!
+  name: String
+  description: String
+  code: String
+  quantity: Float
+  value: Float
+  condition: String
+  supplier_id: String
+  responsible_id: String
+  files_url: [String!]
+  place_id: String
+  acquisition_date: DateTime
+}
+
+input StartPatrolInput {
+  condo_id: String!
+  responsible_id: String!
+  observations: String
+  scheduled_at: DateTime
+}
+
+input AddPatrolCheckpointInput {
+  patrol_id: String!
+  latitude: Float!
+  longitude: Float!
+  label: String
+  observations: String
+  recorded_at: DateTime
+}
+
+input EndPatrolInput {
+  patrol_id: String!
+  observations: String
+}
+
+input UpdatePatrolStatusInput {
+  patrol_id: String!
+  status: String!
+}
+
+input SaveMovingScheduleConfigInput {
+  condo_id: String!
+  weekly_rules: [MovingScheduleDayRuleInput!]!
+  is_active: Boolean
+}
+
+input MovingScheduleDayRuleInput {
+  weekday: Int!
+  active: Boolean!
+  periods: [MovingSchedulePeriodInput!]!
+}
+
+input MovingSchedulePeriodInput {
+  startTime: String!
+  endTime: String!
+  slotDurationMinutes: Int!
+  capacity: Int!
+}
+
+input CreateMovingBlackoutInput {
+  condo_id: String!
+  reason: String!
+  note: String
+  starts_at: DateTime!
+  ends_at: DateTime!
+}
+
+input DeleteMovingBlackoutInput {
+  id: String!
+  condo_id: String!
+}
+
+input CreateMovingBookingInput {
+  condo_id: String!
+  block_id: String
+  unity_id: String
+  person_name: String!
+  person_email: String!
+  person_phone: String!
+  who_are_you: String!
+  moving_type: String!
+  scheduled_at: DateTime!
+  duration_minutes: Int!
+  notes: String
+}
+
+input UpdateMovingBookingStatusInput {
+  booking_id: String!
+  status: String!
+}
+
+input CancelMovingBookingPublicInput {
+  booking_id: String!
+  person_email: String!
+}
+
+input RegisterPackageInput {
+  condo_id: String!
+  block_id: String!
+  unity_id: String!
+  recipient_name: String!
+  recipient_email: String!
+  photo_urls: [String!]
+}
+
+input PickupPackageInput {
+  package_id: String!
+  picked_up_by_name: String
+}
+
+input CancelPackageInput {
+  package_id: String!
+  reason: String!
+}
+
+input DerivePackageInput {
+  original_package_id: String!
+  block_id: String!
+  unity_id: String!
+  recipient_name: String!
+  recipient_email: String!
+}
+
+input CreateCondoResidentInput {
+  condo_id: String!
+  block_id: String!
+  unity_id: String!
+  name: String!
+  email: String!
+  phone: String!
+  ownership_type: String!
+}
+
+input UpdateCondoResidentInput {
+  resident_id: String!
+  block_id: String!
+  unity_id: String!
+  name: String!
+  email: String!
+  phone: String!
+  ownership_type: String!
+}
+
+input UpdateCondoResidentRelationshipInput {
+  resident_id: String!
+  relationship: String!
+}
+
+input AddCondoResidentObservationInput {
+  resident_id: String!
+  content: String!
+}
+
+input CondoResidentImportInput {
+  condo_id: String!
+  rows: [CondoResidentImportRowInput!]!
+}
+
+input CondoResidentImportRowInput {
+  row_number: Int!
+  name: String
+  email: String
+  phone: String
+  block: String
+  unity: String
+  ownership_type: String
+}
+
+input CreateAnonymousReportInput {
+  condo_id: String!
+  category: AnonymousReportCategory! = OTHER
+  urgency: AnonymousReportUrgency! = MEDIUM
+  is_identified: Boolean! = false
+  reporter_name: String
+  reporter_email: String
+  reporter_phone: String
+  reporter_relation: String
+  reporter_block_id: String
+  reporter_unity_id: String
+  involved_block_id: String
+  involved_unity_id: String
+  location_details: String
+  title: String!
+  description: String!
+  incident_at: DateTime
+  files_url: [String!]
+}
+
+input UpdateAnonymousReportStatusInput {
+  id: String!
+  status: AnonymousReportStatus!
+}
+
+input UpdateAnonymousReportInternalNotesInput {
+  id: String!
+  internal_notes: String!
+}
+
+input CreateAnonymousReportManagerResponseInput {
+  report_id: String!
+  message: String!
+  files_url: [String!]
+}
+
+input CreateAnonymousReportPublicResponseInput {
+  report_id: String!
+  tracking_token: String!
+  message: String!
+  files_url: [String!]
+}
+
+input CreateOccurrenceInput {
+  person_name: String!
+  person_email: String!
+  person_phone: String!
+  who_are_you: String!
+  title: String!
+  description: String!
+  unity_id: String
+  block_id: String
+  condo_id: String!
+  files_url: [String!]
+  occurrence_at: DateTime!
+}
+
+input UpdateOccurrenceInput {
+  occurrenceId: String!
+  title: String
+  description: String
+  category: String
+}
+
+input CreateOccurrenceResponseInput {
+  response: String!
+  condominium_manager_id: String
+  condominium_manager_email: String
+  person_email: String
+  link: String
+  occurrence_id: String!
+  files_url: [String!]
+}
+
+input ReviewOccurrenceAiSuggestionInput {
+  analysisId: String!
+  outcome: String!
+}
+
+input CreatePersonInput {
+  name: String!
+  phone: String!
+  document: String!
+  created_by_person_id: String
+}
+
+input CreateEmployeeInput {
+  name: String!
+  phone: String!
+  document: String!
+  profile_slug: String!
+  condos: [String!]!
+  created_by_person_id: String!
+  email: String!
+  password: String!
+}
+
+input RegisterPersonInput {
+  name: String!
+  phone: String!
+  document: String!
+  email: String!
+  password: String!
+  person_function: String
+  created_by_person_id: String
+}
+
+input UpdatePersonInput {
+  id: String!
+  name: String
+  phone: String
+  profile: String
+}
+
+input UpdateEmployeeInput {
+  employee_id: String!
+  name: String
+  phone: String
+  document: String
+  profile_id: String
+  condos_id: [String!]
+  email: String
+  password: String
+  onlyShowMyTasks: Boolean
+  showPanel: Boolean
+}
+
+input SendEmailToContactRequestInput {
+  email: String!
+  name: String!
+  content: String!
+  phone: String!
+  subject_contact: String!
+}
+
+input ChangePersonAccountPasswordInput {
+  email: String!
+  currentPassword: String!
+  newPassword: String!
+}
+
+input SendEmailToPersonAccountInput {
+  email: String!
+  link: String
+}
+
+input SendEmailInput {
+  recipient: String!
+  from: String
+  subject: String!
+  body: String!
+  attachments: [AttachmentInput!]
+}
+
+input AttachmentInput {
+  cid: String
+  content: String
+  contentDisposition: String
+  contentTransferEncoding: String
+  contentType: String
+  encoding: String
+  filename: String
+  path: String
+  raw: String
+}
+
+input ResetPersonAccountPasswordInput {
+  forgotPasswordToken: String!
+  newPassword: String!
+}
+
+input CreatePersonContextInput {
+  name: String!
+  document: String!
+  phone: String!
+  email: String!
+  password: String!
+  person_function: String!
+  stripe_id: String
+  stripe_status: String
+  stripe_price_id: String
+  stripe_product_id: String
+  condos_limit: Float
+  expiration_date: DateTime
+}
+
+input updatePersonContextInput {
+  id: String!
+  profile_id: String
+  unity_id: String
+  name: String
+}
+
+input CreateCondoInput {
+  name: String!
+  document: String!
+  phone: String!
+  created_by_person_id: String!
+}
+
+input UpdateCondoInput {
+  condo_id: String!
+  name: String
+  document: String
+  phone: String
+  appeal_deadline_days: Int
+}
+
+input CreatePlaceInput {
+  name: String!
+  place_type_id: String!
+  condo_id: String!
+}
+
+input DeletePlaceInput {
+  id: String!
+}
+
+input UpdatePlaceInput {
+  id: String!
+  name: String
+  place_type_id: String
+}
+
+input CreatePlaceTypeInput {
+  name: String!
+  slug: String!
+}
+
+input CreatePrioritySurveyInput {
+  name: String!
+  condominium_manager_id: String!
+  description: String
+  link: String
+  condo_id: String!
+  priority_items: [String!]!
+  closing_date: DateTime!
+}
+
+input CreatePrioritySurveyResponseInput {
+  block_id: String!
+  unity_id: String!
+  block_name: String!
+  unity_name: String!
+  person_email: String!
+  person_name: String!
+  priority_survey_id: String!
+  priority_items: [PriorityItemTypeInput!]!
+}
+
+input PriorityItemTypeInput {
+  id: String!
+  name: String!
+}
+
+input DeletePrioritySurveyInput {
+  priority_survey_id: String!
+  person_email: String!
+}
+
+input SetPrioritySurveyExcludedInput {
+  priority_survey_id: String!
+  person_id: String!
+}
+
+input CreateProfileInput {
+  name: String!
+  slug: String!
+}
+
+input CreateRealizationInput {
+  title: String!
+  description: String!
+  topic: String!
+  condominium_manager_id: String!
+  condo_id: String!
+  image_url: String!
+  file_urls: [String!]
+  held_in: DateTime
+  before_file_urls: [String!]
+}
+
+input UpdateRealizationInput {
+  realization_id: String!
+  title: String
+  description: String
+  topic: String
+  image_url: String
+  held_in: DateTime
+  file_urls: [String!]
+  before_file_urls: [String!]
+}
+
+input CreateRealizationBudgetInput {
+  title: String!
+  description: String!
+  price: Float!
+  realization_id: String!
+  file_urls: [String!]
+  held_in: DateTime!
+}
+
+input UpdateRealizationBudgetInput {
+  realization_budget_id: String!
+  title: String
+  description: String
+  price: Float
+  file_urls: [String!]
+  held_in: DateTime
+}
+
+input CreateRealizationCommentInput {
+  person_name: String
+  comment: String!
+  realization_id: String!
+  block_id: String
+  unity_id: String
+}
+
+input CreateSubRealizationCommentInput {
+  person_name: String
+  comment: String!
+  realization_id: String!
+  parent_realization_comment_id: String!
+  block_id: String
+  unity_id: String
+}
+
+input UpdateRealizationCommentInput {
+  realization_comment_id: String!
+  person_name: String
+  comment: String
+  block_id: String
+  unity_id: String
+}
+
+input CreateRealizationCommentReactionInput {
+  realization_comment_id: String!
+  reaction_type: String!
+}
+
+input UpdateRealizationCommentReactionInput {
+  realization_comment_reaction_id: String!
+  realization_comment_id: String
+  reaction_type: String
+}
+
+input CreateOrUpdateResumeInput {
+  name: String
+  email: String
+  city: String
+  phone: String
+  avatar_url: String
+  about: String
+  skills: [InformationTypeInput!]
+  experience: [InformationTypeInput!]
+  education: [InformationTypeInput!]
+  person_id: String!
+}
+
+input InformationTypeInput {
+  title: String!
+  description: String!
+}
+
+input CreateSurveyInput {
+  name: String!
+  condominium_manager_id: String!
+  description: String
+  link: String
+  condo_id: String!
+  closing_date: DateTime!
+}
+
+input CreateSurveyResponseInput {
+  block_id: String!
+  unity_id: String!
+  block_name: String!
+  unity_name: String!
+  person_email: String!
+  person_name: String!
+  survey_id: String!
+  answer: String!
+}
+
+input DeleteSurveyInput {
+  survey_id: String!
+  person_email: String!
+}
+
+input SetSurveyExcludedInput {
+  survey_id: String!
+  person_id: String!
+}
+
+input CreateUnityInput {
+  name: String!
+  floor: Float
+  totalInFloor: Float
+  initialValue: Float
+  endValue: Float
+  block_id: String
+  condo_id: String!
+}
+
+input CreateUnitiesInput {
+  name: String
+  condo_id: String!
+  floor: Float
+  block_id: String
+  amount: Float!
+  isVertical: Boolean!
+  unitiesPerFloor: Float
+  prefix: String
+  suffix: String
+}
+
+input CreateUnitiesInFloorInput {
+  floor: Float!
+  initialValue: Float!
+  endValue: Float!
+  condo_id: String!
+  block_id: String
+  prefix: String
+}
+
+input UpdateUnityInput {
+  id: String!
+  floor: Float
+  name: String
+}
+
+input AssignUnityToBlockInput {
+  unity_id: String!
+  block_id: String!
+  floor: Float
+}
+
+input CreateKanbanColumnInput {
+  name: String!
+  kanban_id: String!
+  position: Float!
+  column_type: String!
+}
+
+input UpdateKanbanColumnInput {
+  kanban_column_id: String!
+  name: String
+  position: Float
+  column_type: String
+}
+
+input CreateKanbanCardInput {
+  title: String!
+  description: String!
+  responsible_id: String
+  category_id: String
+  priority: String!
+  condo_id: String!
+  kanban_column_id: String!
+  file_urls: [String!]
+  before_file_urls: [String!]
+  recurrence_dates: [String!]
+  is_recurring_task: Boolean
+  week_day: Float
+  frequency: String
+  start_date: DateTime!
+  end_date: DateTime
+  due_date: DateTime
+  hour: String
+  position: Float
+  isCommunicationSent: Boolean
+  occurrenceId: String
+}
+
+input DuplicateKanbanCardInput {
+  kanban_card_id: String!
+}
+
+input UpdateKanbanCardInput {
+  kanban_card_id: String!
+  title: String
+  description: String
+  responsible_id: String
+  category_id: String
+  priority: String
+  person_id: String!
+  kanban_column_id: String
+  file_urls: [String!]
+  before_file_urls: [String!]
+  recurrence_dates: [String!]
+  start_date: DateTime
+  end_date: DateTime
+  due_date: DateTime
+  hour: String
+  position: Float
+  isCommunicationSent: Boolean
+  is_recurring_task: Boolean
+  frequency: String
+  week_day: Int
+}
+
+input DeleteRecurrentKanbanCardInput {
+  condominium_manager_id: String!
+  title: String!
+}
+
+input CreateKanbanCardCommentInput {
+  content: String!
+  person_id: String!
+  kanban_card_id: String!
+}
+
+input UpdateKanbanCardCommentInput {
+  content: String!
+  kanban_card_comment_id: String!
+}
+
+input CreateKanbanCardCategoryInput {
+  name: String!
+  condominium_manager_id: String!
+}
+
+input UpdateKanbanCardCategoryInput {
+  name: String!
+  condominium_manager_id: String!
+  kanban_card_category_id: String!
+}
+
+input CreateCardCategoryCondominiumManagerInput {
+  category_id: String!
+  condominium_manager_id: String!
+}
+
+input DeleteCardCategoryCondominiumManagerInput {
+  category_id: String!
+  condominium_manager_id: String!
+}
+
+input CreateSupplierInput {
+  name: String!
+  company_name: String
+  created_by_person_id: String!
+  phone: String
+  document: String
+  contact_email: String
+  site: String
+  instagram: String
+}
+
+input UpdateSupplierInput {
+  supplier_id: String!
+  created_by_person_id: String!
+  name: String
+  company_name: String
+  person_name: String
+  phone: String
+  document: String
+  contact_email: String
+  avatar_url: String
+  site: String
+  instagram: String
+}
+
+input DeleteSupplierInput {
+  supplier_id: String!
+  created_by_person_id: String!
+}
+
+input CreateSupplierCategoryInput {
+  name: String!
+  slug: String!
+  description: String
+}
+
+input UpdateSupplierCategoryInput {
+  id: String!
+  name: String
+  slug: String
+  description: String
+}
+
+input DeleteSupplierCategoryInput {
+  id: String!
+}
+
+input CreateSupplierSubCategoryInput {
+  name: String!
+  slug: String!
+  description: String
+  category_id: String!
+}
+
+input UpdateSupplierSubCategoryInput {
+  id: String!
+  name: String
+  slug: String
+  description: String
+  category_id: String
+}
+
+input DeleteSupplierSubCategoryInput {
+  id: String!
+}
+
+input CreateSupplierCategoryRelationInput {
+  supplier_id: String!
+  category_id: String
+  sub_category_id: String
+}
+
+input UpdateSupplierCategoryRelationInput {
+  id: String!
+  category_id: String
+  sub_category_id: String
+}
+
+input DeleteSupplierCategoryRelationInput {
+  id: String!
+}
+
+input CreateSupplierWorkInput {
+  title: String!
+  description: String
+  coverUrl: String
+  clientName: String
+  fileUrls: [String!]
+  supplierId: String!
+  condoId: String
+}
+
+input UpdateSupplierWorkInput {
+  id: String!
+  title: String
+  description: String
+  coverUrl: String
+  clientName: String
+  fileUrls: [String!]
+  condoId: String
+}
+
+input DeleteSupplierWorkInput {
+  id: String!
+}
+
+input CreateSupplierRatingInput {
+  ratedById: String!
+  description: String
+  supplierId: String!
+  condoId: String
+  rating: Float!
+}
+
+input UpdateSupplierRatingInput {
+  id: String!
+  description: String
+  rating: Float
+}
+
+input CreateContractInput {
+  start_date: DateTime!
+  period: Float!
+  value: Float!
+  file_urls: [String!]!
+  condition_termination_of_contract: String
+  readjustment_index: String!
+  supplier_id: String!
+  condo_id: String!
+  condominium_manager_id: String!
+}
+
+input UpdateContractInput {
+  contract_id: String!
+  start_date: DateTime
+  period: Float
+  value: Float
+  file_urls: [String!]
+  condition_termination_of_contract: String
+  readjustment_index: String
+  status: String
+  supplier_id: String
+}
+
+input CreateCondoSupplierInput {
+  supplier_id: String!
+  condo_id: String!
+}
+
+input CreateCondoAttachmentInput {
+  title: String!
+  type: CondoAttachmentType!
+  url: String!
+  condo_id: String!
+  folder_path: String
+  s3_key: String
+}
+
+input UpdateCondoAttachmentInput {
+  condo_attachment_id: String!
+  title: String
+  type: CondoAttachmentType
+  url: String
+  condo_id: String
+  folder_path: String
+  s3_key: String
+}
+
+input CreateCondoStorageFolderInput {
+  name: String!
+  condo_id: String!
+  parent_path: String = ""
+}
+
+input CreateNotificationInput {
+  title: String!
+  description: String
+  name: String!
+  email: String!
+  phone: String
+  link: String
+  is_it_a_fine: Boolean
+  value: Float
+  condo_id: String!
+  unity_id: String!
+  block_id: String!
+  occurrence_id: String
+  files_url: [String!]
+  date: DateTime
+  hour: String
+  cited_notification_ids: [String!]
+}
+
+input CreateNotificationFromOccurrenceInput {
+  occurrence_id: String!
+  is_it_a_fine: Boolean
+  value: Float
+}
+
+input SubmitNotificationForAdminReviewInput {
+  notification_id: String!
+}
+
+input FinishAdminReviewInput {
+  notification_id: String!
+}
+
+input ReturnNotificationForEditsInput {
+  notification_id: String!
+  response: String!
+}
+
+input ApproveNotificationInput {
+  notification_id: String!
+}
+
+input SendNotificationToResidentInput {
+  notification_id: String!
+  public_base_url: String
+}
+
+input CancelNotificationInput {
+  notification_id: String!
+}
+
+input FileNotificationAppealInput {
+  access_token: String!
+  response: String!
+  files_url: [String!]
+  resident_name: String!
+  resident_email: String!
+}
+
+input ResolveNotificationAppealInput {
+  notification_id: String!
+  uphold: Boolean!
+  response: String!
+}
+
+input UpdateNotificationInput {
+  notification_id: String!
+  title: String
+  description: String
+  name: String
+  email: String
+  phone: String
+  link: String
+  is_it_a_fine: Boolean
+  was_read: Boolean
+  value: Float
+  unity_id: String
+  block_id: String
+  files_url: [String!]
+  signed_file: String
+  date: DateTime
+  hour: String
+  proof_has_been_read_ip: String
+  proof_has_been_read_date: DateTime
+  cited_notification_ids: [String!]
+}
+
+input CreateDocumentTemplateInput {
+  title: String!
+  description: String
+  category: DocumentTemplateCategory!
+  content: String!
+  visibility: DocumentTemplateVisibility
+  hide_title_when_printed: Boolean
+}
+
+input UpdateDocumentTemplateInput {
+  template_id: String!
+  title: String
+  description: String
+  category: DocumentTemplateCategory
+  content: String
+  visibility: DocumentTemplateVisibility
+  hide_title_when_printed: Boolean
+  is_active: Boolean
+}
+
+input RenderDocumentTemplatePreviewInput {
+  template_id: String!
+  title: String
+  name: String
+  description: String
+  condo_name: String
+  condo_address: String
+  block_name: String
+  unity_name: String
+  date: DateTime
+  hour: String
+  fine_value: String
+  manager_name: String
+  manager_email: String
+  protocol_number: String
+}
+
+input UpsertNotificationBrandingInput {
+  condo_id: String!
+  logo_url: String
+  issuer_name: String
+  issuer_document: String
+  footer_text: String
+  primary_color: String
+}
+
+input CreateNotificationResponseInput {
+  response: String!
+  condominium_manager_id: String
+  date: DateTime
+  notification_id: String
+  access_token: String
+  files_url: [String!]
+  author_type: NotificationResponseAuthorType
+  kind: NotificationResponseKind
+  is_internal: Boolean
+  public_base_url: String
+  resident_name: String
+  resident_email: String
+}
+
+input UpdateNotificationResponseInput {
+  notification_response_id: String!
+  response: String
+  date: DateTime
+  files_url: [String!]
+}
+
+input CreateFeatureInput {
+  name: String!
+  slug: String!
+}
+
+input UpdateFeatureInput {
+  feature_id: String!
+  name: String
+  slug: String
+}
+
+input CreatePersonPermissionInput {
+  person_id: String!
+  person_context_id: String!
+  profile_id: String!
+  feature_slug: String!
+  condo_id: String!
+  actions: [String!]!
+}
+
+input UpdatePersonPermissionInput {
+  person_permission_id: String!
+  profile_id: String
+  feature_slug: String
+  actions: [String!]
+}
+
+input CreateReactionInput {
+  name: String!
+  type: String!
+}
+
+input CreateAssemblyInput {
+  title: String!
+  place: String
+  type: String!
+  first_call_date: DateTime!
+  first_call_hour: String!
+  second_call_date: DateTime
+  second_call_hour: String
+  condo_id: String!
+}
+
+input UpdateAssemblyInput {
+  assembly_id: String!
+  title: String
+  place: String
+  type: String
+  first_call_date: DateTime
+  first_call_hour: String
+  second_call_date: DateTime
+  second_call_hour: String
+  ata: String
+}
+
+input CreateQuestionInput {
+  subject: String!
+  description: String
+  files_url: [String!]
+  assembly_id: String!
+}
+
+input UpdateQuestionInput {
+  question_id: String!
+  subject: String
+  description: String
+  files_url: [String!]
+  status: String
+}
+
+input VoteInput {
+  vote_type: String!
+  question_id: String!
+  resident_id: String!
+}
+
+input UpdateVoteInput {
+  question_vote_id: String!
+  vote_type: String
+}
+
+input CheckInInput {
+  first_name: String!
+  last_name: String!
+  email: String!
+  phone: String!
+  assembly_id: String!
+  block_id: String!
+  unity_id: String!
+  ip: String!
+}
+
+input UpdateResidentInput {
+  resident_id: String!
+  first_name: String
+  last_name: String
+  email: String
+  phone: String
+}
+
+input CreateAssemblyRepresentativeInput {
+  name: String!
+  role: String!
+  email: String!
+  phone: String!
+  assembly_id: String!
+  block_id: String
+  unity_id: String
+}
+
+input UpdateAssemblyRepresentativeInput {
+  representative_id: String!
+  name: String
+  role: String
+  email: String
+  phone: String
+}
+
+input CreateNoteInput {
+  title: String!
+  description: String!
+  condo_id: String!
+}
+
+input UpdateNoteInput {
+  note_id: String!
+  title: String
+  description: String
+}
+
+input SendNotificationInput {
+  title: String!
+  content: String!
+  type: String!
+  redirect: String
+  recipient_id: String!
+  responsible_id: String!
+}
+
+input CreateLogInput {
+  action: String!
+  resource: String!
+  person_id: String!
+}
+
+input SubscriptionInput {
+  endpoint: String!
+  keys: KeysInput!
+}
+
+input KeysInput {
+  p256dh: String!
+  auth: String!
+}
+
+input GetPersonInfoByTokenInput {
+  token: String!
+}
+
+input CreateAuthInput {
+  email: String!
+  password: String!
+}
+
+input RefreshTokensInput {
+  personId: String!
+  refreshToken: String!
+}
+
+input RefreshTokenClientSideInput {
+  refreshToken: String!
+}
+
+input CreateBlogAuthorInput {
+  name: String!
+  bio: String
+  photo_url: String
+  email: String
+  is_ai: Boolean! = false
+}
+
+input UpdateBlogAuthorInput {
+  id: String!
+  name: String
+  bio: String
+  photo_url: String
+  email: String
+  is_ai: Boolean
+}
+
+input CreateBlogCategoryInput {
+  name: String!
+  slug: String!
+  description: String
+}
+
+input UpdateBlogCategoryInput {
+  id: String!
+  name: String
+  slug: String
+  description: String
+}
+
+input CreateBlogTagInput {
+  name: String!
+  slug: String!
+  description: String
+}
+
+input UpdateBlogTagInput {
+  id: ID!
+  name: String!
+  slug: String!
+  description: String
+}
+
+input CreateBlogPostInput {
+  title: String!
+  slug: String!
+  content: String!
+  summary: String
+  featured_image_url: String
+  status: String!
+  author_id: String!
+  category_id: String
+  published_at: DateTime
+  tag_ids: [String!]
+}
+
+input UpdateBlogPostInput {
+  id: ID!
+  title: String
+  slug: String
+  content: String
+  summary: String
+  featured_image_url: String
+  status: String!
+  author_id: String
+  category_id: String
+  published_at: DateTime
+  tag_ids: [String!]
+}
+
+input CreateRatingInput {
+  person_id: String!
+  rate: Int!
+  message: String
+  screen: String!
+}
+
+input UpdateRatingInput {
+  id: String!
+  rate: Int
+  message: String
+  screen: String
+}
+
+input CreateCondoAddressInput {
+  name: String!
+  street: String!
+  number: Float
+  city: String!
+  zipCode: String!
+  state: String!
+  country: String!
+  longitude: Float!
+  latitude: Float!
+  condoId: String!
+}
+
+input UpdateCondoAddressInput {
+  condoAddressId: String!
+  name: String
+  street: String
+  number: Float
+  city: String
+  zipCode: String
+  state: String
+  country: String
+  longitude: Float
+  latitude: Float
+  condoId: String
+}
+
+input CreateSupplierAddressInput {
+  name: String!
+  street: String!
+  number: Float
+  city: String!
+  zipCode: String!
+  state: String!
+  country: String!
+  longitude: Float!
+  latitude: Float!
+  supplierId: String!
+}
+
+input UpdateSupplierAddressInput {
+  supplierAddressId: String!
+  name: String
+  street: String
+  number: Float
+  city: String
+  zipCode: String
+  state: String
+  country: String
+  longitude: Float
+  latitude: Float
+  supplierId: String
+}
+
+input StartInventoryInspectionInput {
+  place_id: String!
+  type: InventoryInspectionType!
+  resident_id: String
+  block_id: String
+  unity_id: String
+  recipient_name: String
+  recipient_email: String
+  send_receipt: Boolean
+}
+
+input UpdateInventoryInspectionItemInput {
+  inspection_id: String!
+  item_id: String!
+  expected_version: Int!
+  result: InventoryInspectionResult!
+  issue_type: InventoryIssueType
+  observed_quantity: Int
+  affected_quantity: Int
+  observation: String
+}
+
+input SaveInventoryInspectionItemsInput {
+  inspection_id: String!
+  expected_version: Int!
+  items: [InventoryInspectionItemResultInput!]!
+}
+
+input InventoryInspectionItemResultInput {
+  item_id: String!
+  result: InventoryInspectionResult!
+  issue_type: InventoryIssueType
+  observed_quantity: Int
+  affected_quantity: Int
+  observation: String
+}
+
+input RequestInventoryInspectionSignoffInput {
+  inspection_id: String!
+  expected_version: Int!
+}
+
+input DuplicatePlaceInventoryInput {
+  source_place_id: String!
+  target_place_id: String!
+}
+
+input CreatePlaceChecklistInput {
+  description: String
+  placeId: String!
+  blockId: String
+  unityId: String
+  responsibleId: String
+  date: DateTime!
+  checklist: [ChecklistInput!]!
+}
+
+input ChecklistInput {
+  deviceId: String!
+  name: String!
+  quantity: Float!
+  observation: String
+  isOk: Boolean!
+}
+
+input UpdatePlaceChecklistInput {
+  placeChecklistId: String!
+  description: String
+  blockId: String
+  unityId: String
+  responsibleId: String
+  date: DateTime
+  checklist: [ChecklistInput!]
+}
+
+input CreatePlaceBillingInput {
+  placeChecklistId: String!
+  total: Float!
+  billingItems: [BillingItemInput!]!
+}
+
+input BillingItemInput {
+  deviceId: String!
+  name: String!
+  quantity: Float!
+  value: Float!
+}
+
+input UpdatePlaceBillingInput {
+  placeBillingId: String!
+  total: Float
+  billingItems: [BillingItemInput!]
+}
