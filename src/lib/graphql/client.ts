@@ -44,9 +44,15 @@ export async function executeGraphql<TData, TVariables = Record<string, never>>(
       throw new AppError('network', 'Não foi possível confirmar sua sessão. Tente novamente.')
     // Mutations may already have effects: never replay them implicitly.
     if (!/^\s*query\b/.test(document.toString())) throw error
-    const data = await requestGraphql(document, variables, options)
-    if (!isCurrent()) throw new AppError('cancelled', 'Solicitação cancelada.')
-    return data
+    try {
+      const data = await requestGraphql(document, variables, options)
+      if (!isCurrent()) throw new AppError('cancelled', 'Solicitação cancelada.')
+      return data
+    } catch (retryError) {
+      if (isCurrent() && retryError instanceof AppError && retryError.type === 'unauthenticated')
+        bridge.onSessionInvalid()
+      throw retryError
+    }
   }
 }
 

@@ -2,7 +2,7 @@
 
 ## Executado
 
-- Mobile: lint e TypeScript; 46 testes automatizados em 9 suítes cobrindo formulário, navegação, restauração confirmada, expiração, rede, logout, persistência, erros de envelope/HTTP, concorrência e respostas atrasadas.
+- Mobile: lint e TypeScript; 47 testes automatizados em 9 suítes cobrindo formulário, navegação, restauração confirmada, expiração, rede, logout, persistência, erros de envelope/HTTP, concorrência e respostas atrasadas.
 - Contrato mobile: geração tipada contra o schema novo e verificação de drift.
 - Backend: 15 testes em duas suítes, com JWT real e persistência simulada; login, hash, rotação repetida/concorrente, replay, dois aparelhos, logout, conta inativa/excluída, audience/tipo de token, bearer legado e comparação do schema com decorators reais.
 - Backend: build Nest e validação do schema Prisma. O typecheck global incluindo specs encontrou erro preexistente de mock em `manage-packages.spec.ts`; o build de produção e os novos testes passam.

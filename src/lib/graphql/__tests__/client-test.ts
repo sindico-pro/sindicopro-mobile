@@ -199,6 +199,25 @@ describe('executeGraphql', () => {
 })
 
 describe('respostas inesperadas e cancelamento', () => {
+  it('encerra sessão se a consulta continuar não autenticada depois de uma renovação', async () => {
+    const invalid = jest.fn()
+    const refresh = jest.fn(async () => 'refreshed' as const)
+    setAuthBridge({
+      getSessionVersion: () => 1,
+      getAccessToken: () => 'token',
+      refreshSession: refresh,
+      onSessionInvalid: invalid,
+    })
+    const request = jest.fn(async () =>
+      jsonResponse({ errors: [{ extensions: { code: 'UNAUTHENTICATED' } }] }),
+    )
+    await expect(
+      executeGraphql(protectedDocument, undefined, { fetch: request }),
+    ).rejects.toMatchObject({ type: 'unauthenticated' })
+    expect(request).toHaveBeenCalledTimes(2)
+    expect(refresh).toHaveBeenCalledTimes(1)
+    expect(invalid).toHaveBeenCalledTimes(1)
+  })
   it.each([{}, { errors: {} }, { errors: [null] }, { data: [] }, { data: null }])(
     'rejeita envelope malformado %j',
     (body) => {
