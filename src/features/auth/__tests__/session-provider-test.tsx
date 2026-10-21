@@ -1,197 +1,229 @@
-import { fireEvent, render, waitFor } from '@testing-library/react-native'
+import { act, fireEvent, render, waitFor } from '@testing-library/react-native'
 import { QueryClient } from '@tanstack/react-query'
-import { useState } from 'react'
 import { Text } from 'react-native'
+import { useEffect } from 'react'
 
-import type { SessionUser } from '@/features/auth/api/schemas'
+import { authApi } from '@/features/auth/api/auth-api'
 import { SessionProvider, useSession } from '@/features/auth/session/session-provider'
+import * as storage from '@/features/auth/session/session-storage'
 import { tokenMemory } from '@/features/auth/session/token-memory'
+import { getAuthBridge } from '@/lib/graphql/auth-bridge'
 import { AppError } from '@/lib/graphql/errors'
 import { tokenWithExpiration } from '@/test/jwt'
 
-jest.mock('@/lib/graphql/client', () => ({
-  executeGraphql: jest.fn(),
+jest.mock('@/features/auth/api/auth-api', () => ({
+  authApi: { signIn: jest.fn(), refresh: jest.fn(), me: jest.fn(), revoke: jest.fn() },
 }))
-
 jest.mock('@/features/auth/session/session-storage', () => ({
   loadStoredSession: jest.fn(),
   saveStoredSession: jest.fn(),
   clearStoredSession: jest.fn(),
 }))
-
-const { executeGraphql } = jest.requireMock('@/lib/graphql/client') as {
-  executeGraphql: jest.Mock
+const api = jest.mocked(authApi)
+const saved = jest.mocked(storage)
+const user = { id: 'person-1', name: 'Ana', email: 'ana@example.com', status: 'ACTIVE' as const }
+const tokens = () => ({
+  accessToken: tokenWithExpiration(Math.floor(Date.now() / 1000) + 3600),
+  refreshToken: 'new-refresh',
+})
+function deferred<T>() {
+  let resolve!: (value: T) => void
+  const promise = new Promise<T>((done) => {
+    resolve = done
+  })
+  return { promise, resolve }
 }
-const storage = jest.requireMock('@/features/auth/session/session-storage') as {
-  loadStoredSession: jest.Mock
-  saveStoredSession: jest.Mock
-  clearStoredSession: jest.Mock
-}
-
-const user: SessionUser = {
-  id: 'person-1',
-  name: 'Ana',
-  email: 'ana@example.com',
-  isEmployee: false,
-  createdByPersonId: null,
-  showPanel: true,
-  profileSlugs: ['external-condominium-manager'],
-  status: 'ACTIVE',
-}
-
+let session: ReturnType<typeof useSession>
 function Probe() {
-  const session = useSession()
-  const [error, setError] = useState('')
-
-  if (session.status === 'restoring') return <Text>loading</Text>
-  if (session.status === 'signedIn') {
-    return (
-      <>
-        <Text>hello {session.user?.name}</Text>
-        <Text>{session.isOffline ? 'offline' : 'online'}</Text>
-        <Text onPress={() => void session.signOut()}>sair</Text>
-      </>
-    )
-  }
-
+  const value = useSession()
+  useEffect(() => {
+    session = value
+  }, [value])
   return (
     <>
-      <Text>{`signed-out ${session.signOutReason ?? 'none'}`}</Text>
+      <Text>{value.status}</Text>
+      <Text>{value.user?.name ?? 'no-user'}</Text>
       <Text
         onPress={() => {
-          void session.signIn('ana@example.com', 'segredo').catch((caught: unknown) => {
-            setError(caught instanceof Error ? caught.message : 'erro')
-          })
-        }}>
-        login
+          void value.signOut()
+        }}
+      >
+        sair
       </Text>
-      {error ? <Text>{error}</Text> : null}
+      <Text
+        onPress={() => {
+          void value.retry()
+        }}
+      >
+        retry
+      </Text>
     </>
   )
 }
-
-function renderSession() {
+function setup(client = new QueryClient()) {
   return render(
-    <SessionProvider client={new QueryClient()}>
+    <SessionProvider client={client}>
       <Probe />
     </SessionProvider>,
   )
 }
 
-describe('SessionProvider', () => {
-  beforeEach(() => {
-    tokenMemory.clear()
-    executeGraphql.mockReset()
-    storage.loadStoredSession.mockReset()
-    storage.saveStoredSession.mockReset()
-    storage.clearStoredSession.mockReset()
-    storage.loadStoredSession.mockResolvedValue(null)
-    storage.saveStoredSession.mockResolvedValue(undefined)
-    storage.clearStoredSession.mockResolvedValue(undefined)
-    executeGraphql.mockResolvedValue({ personAccountByPersonId: { status: 'ACTIVE' } })
+beforeEach(() => {
+  jest.clearAllMocks()
+  tokenMemory.clear()
+  saved.loadStoredSession.mockResolvedValue(null)
+  saved.saveStoredSession.mockResolvedValue(undefined)
+  saved.clearStoredSession.mockResolvedValue(undefined)
+  api.signIn.mockResolvedValue({ ...tokens(), person: user })
+  api.refresh.mockResolvedValue(tokens())
+  api.me.mockResolvedValue(user)
+  api.revoke.mockResolvedValue(undefined)
+})
+it('abre deslogado sem credenciais e não faz chamadas ao servidor', async () => {
+  const view = await setup()
+  expect(await view.findByText('signedOut')).toBeTruthy()
+  expect(api.refresh).not.toHaveBeenCalled()
+})
+it('só libera o dashboard depois da identidade confirmada pelo servidor', async () => {
+  saved.loadStoredSession.mockResolvedValue({
+    version: 1,
+    endpoint: 'http://localhost:7400/graphql',
+    refreshToken: 'old',
   })
-
-  it('abre deslogado quando não há sessão salva', async () => {
-    const view = await renderSession()
-    expect(await view.findByText('signed-out none')).toBeTruthy()
+  const identity = deferred<typeof user>()
+  api.me.mockReturnValue(identity.promise)
+  const view = await setup()
+  await waitFor(() => expect(api.me).toHaveBeenCalled())
+  expect(view.queryByText('Ana')).toBeNull()
+  await act(async () => {
+    identity.resolve(user)
   })
-
-  it('restaura a sessão salva', async () => {
-    storage.loadStoredSession.mockResolvedValue({
-      accessToken: tokenWithExpiration(Math.floor(Date.now() / 1000) + 3600),
-      refreshToken: 'refresh',
-      user,
-    })
-
-    const view = await renderSession()
-    expect(await view.findByText('hello Ana')).toBeTruthy()
+  expect(await view.findByText('signedIn')).toBeTruthy()
+  expect(saved.saveStoredSession).toHaveBeenCalledWith('new-refresh')
+})
+it('falha de rede no restore preserva credencial, bloqueia dashboard e permite repetir', async () => {
+  saved.loadStoredSession.mockResolvedValue({
+    version: 1,
+    endpoint: 'http://localhost:7400/graphql',
+    refreshToken: 'old',
   })
-
-  it('encerra a sessão quando o token venceu e o refresh falha', async () => {
-    storage.loadStoredSession.mockResolvedValue({
-      accessToken: tokenWithExpiration(Math.floor(Date.now() / 1000) - 60),
-      refreshToken: 'refresh',
-      user,
-    })
-    executeGraphql.mockRejectedValue(new AppError('unauthenticated', 'Invalid refreshToken'))
-
-    const view = await renderSession()
-    expect(await view.findByText('signed-out expired')).toBeTruthy()
-    expect(storage.clearStoredSession).toHaveBeenCalled()
+  api.refresh.mockRejectedValueOnce(new AppError('network', 'offline'))
+  const view = await setup()
+  expect(await view.findByText('recovery')).toBeTruthy()
+  expect(saved.clearStoredSession).not.toHaveBeenCalled()
+  expect(view.queryByText('Ana')).toBeNull()
+  fireEvent.press(view.getByText('retry'))
+  expect(await view.findByText('Ana')).toBeTruthy()
+})
+it('expiração do refresh encerra a sessão', async () => {
+  saved.loadStoredSession.mockResolvedValue({
+    version: 1,
+    endpoint: 'http://localhost:7400/graphql',
+    refreshToken: 'old',
   })
-
-  it('mantém a sessão offline quando o refresh falha por rede', async () => {
-    storage.loadStoredSession.mockResolvedValue({
-      accessToken: tokenWithExpiration(Math.floor(Date.now() / 1000) - 60),
-      refreshToken: 'refresh',
-      user,
-    })
-    executeGraphql.mockRejectedValue(
-      new AppError('network', 'Sem conexão. Verifique sua internet e tente novamente.'),
-    )
-
-    const view = await renderSession()
-    expect(await view.findByText('hello Ana')).toBeTruthy()
-    expect(await view.findByText('offline')).toBeTruthy()
-    expect(storage.clearStoredSession).not.toHaveBeenCalled()
+  api.refresh.mockRejectedValue(new AppError('unauthenticated', 'expired'))
+  const view = await setup()
+  expect(await view.findByText('signedOut')).toBeTruthy()
+  expect(session.signOutReason).toBe('expired')
+  expect(saved.clearStoredSession).toHaveBeenCalled()
+})
+it('logout limpa cache e credencial mesmo sem rede, revogando só a sessão mobile', async () => {
+  const client = new QueryClient()
+  const view = await setup(client)
+  await view.findByText('signedOut')
+  await act(async () => {
+    await session.signIn(' ana@example.com ', 'senha')
   })
-
-  it('limpa o armazenamento e o cache no logout, mesmo se o backend estiver offline', async () => {
-    storage.loadStoredSession.mockResolvedValue({
-      accessToken: tokenWithExpiration(Math.floor(Date.now() / 1000) + 3600),
-      refreshToken: 'refresh',
-      user,
-    })
-    executeGraphql.mockImplementation(async (_document: unknown, variables?: { personId?: string }) => {
-      if (variables?.personId) {
-        throw new AppError('network', 'Sem conexão. Verifique sua internet e tente novamente.')
-      }
-      return { personAccountByPersonId: { status: 'ACTIVE' } }
-    })
-    const client = new QueryClient()
-    client.setQueryData(['condos', user.id], [{ id: 'condo-1' }])
-
-    const view = await render(
-      <SessionProvider client={client}>
-        <Probe />
-      </SessionProvider>,
-    )
-    fireEvent.press(await view.findByText('sair'))
-
-    expect(await view.findByText('signed-out signedOut')).toBeTruthy()
-    expect(storage.clearStoredSession).toHaveBeenCalled()
-    expect(client.getQueryCache().getAll()).toHaveLength(0)
-    await waitFor(() => {
-      expect(executeGraphql).toHaveBeenCalledWith(
-        expect.anything(),
-        { personId: 'person-1' },
-        { authenticated: false },
-      )
+  client.setQueryData(['private'], { secret: 'A' })
+  api.revoke.mockRejectedValue(new AppError('network', 'offline'))
+  await act(async () => {
+    await session.signOut()
+  })
+  expect(client.getQueryCache().getAll()).toHaveLength(0)
+  expect(api.revoke).toHaveBeenCalledWith('new-refresh')
+  expect(tokenMemory.getAccess()).toBeNull()
+  expect(await view.findByText('signedOut')).toBeTruthy()
+})
+it('falha ao apagar credenciais mantém tela de recuperação, sem falsa saída', async () => {
+  const view = await setup()
+  await view.findByText('signedOut')
+  await act(async () => {
+    await session.signIn('ana@example.com', 'senha')
+  })
+  saved.clearStoredSession.mockRejectedValueOnce(new Error('keychain'))
+  await act(async () => {
+    await session.signOut()
+  })
+  expect(await view.findByText('recovery')).toBeTruthy()
+  expect(session.user).toBeNull()
+  await act(async () => {
+    await session.retry()
+  })
+  expect(await view.findByText('signedOut')).toBeTruthy()
+})
+it('resposta de login atrasada não restaura sessão após saída', async () => {
+  const view = await setup()
+  await view.findByText('signedOut')
+  const login = deferred<Awaited<ReturnType<typeof authApi.signIn>>>()
+  api.signIn.mockReturnValue(login.promise)
+  let pending!: Promise<void>
+  await act(async () => {
+    pending = session.signIn('ana@example.com', 'senha')
+  })
+  await act(async () => {
+    await session.signOut()
+  })
+  await act(async () => {
+    login.resolve({ ...tokens(), person: user })
+    await pending
+  })
+  expect(view.queryByText('Ana')).toBeNull()
+  expect(saved.saveStoredSession).not.toHaveBeenCalled()
+  expect(api.revoke).toHaveBeenCalledWith('new-refresh')
+})
+it('compartilha uma única renovação entre chamadas simultâneas', async () => {
+  const view = await setup()
+  await view.findByText('signedOut')
+  await act(async () => {
+    await session.signIn('ana@example.com', 'senha')
+  })
+  await act(async () => {
+    await Promise.all([getAuthBridge()!.refreshSession(), getAuthBridge()!.refreshSession()])
+  })
+  expect(api.refresh).toHaveBeenCalledTimes(1)
+})
+it('falha de persistência no login não publica sessão e revoga a sessão nova', async () => {
+  const view = await setup()
+  await view.findByText('signedOut')
+  saved.saveStoredSession.mockRejectedValueOnce(new AppError('storage', 'keychain'))
+  await act(async () => {
+    await expect(session.signIn('ana@example.com', 'senha')).rejects.toMatchObject({
+      type: 'storage',
     })
   })
-
-  it('recusa perfil sem acesso e não persiste a sessão', async () => {
-    executeGraphql.mockResolvedValue({
-      createSession: {
-        token: 'access',
-        refreshToken: 'refresh',
-        person: {
-          id: 'person-2',
-          name: 'Fornecedor',
-          email: 'fornecedor@example.com',
-          status: 'ACTIVE',
-          createdByPersonId: null,
-          isEmployee: false,
-          showPanel: false,
-          personContext: [{ profile: { slug: 'supplier' } }],
-        },
-      },
-    })
-
-    const view = await renderSession()
-    fireEvent.press(await view.findByText('login'))
-
-    expect(await view.findByText('Este app é destinado a síndicos e suas equipes')).toBeTruthy()
-    expect(storage.saveStoredSession).not.toHaveBeenCalled()
+  expect(view.queryByText('Ana')).toBeNull()
+  expect(api.revoke).toHaveBeenCalledWith('new-refresh')
+})
+it('logout durante escrita pendente apaga a credencial depois que a escrita terminar', async () => {
+  const view = await setup()
+  await view.findByText('signedOut')
+  const writing = deferred<void>()
+  saved.saveStoredSession.mockReturnValueOnce(writing.promise)
+  let login!: Promise<void>
+  await act(async () => {
+    login = session.signIn('ana@example.com', 'senha')
   })
+  await waitFor(() => expect(saved.saveStoredSession).toHaveBeenCalled())
+  let logout!: Promise<void>
+  await act(async () => {
+    logout = session.signOut()
+  })
+  await act(async () => {
+    writing.resolve()
+    await login
+    await logout
+  })
+  expect(view.queryByText('Ana')).toBeNull()
+  expect(saved.clearStoredSession).toHaveBeenCalled()
+  expect(tokenMemory.getAccess()).toBeNull()
 })

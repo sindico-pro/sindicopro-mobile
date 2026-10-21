@@ -1,223 +1,329 @@
 import { type QueryClient } from '@tanstack/react-query'
-import { createContext, use, useCallback, useEffect, useReducer, useRef, type ReactNode } from 'react'
+import {
+  createContext,
+  use,
+  useCallback,
+  useEffect,
+  useReducer,
+  useRef,
+  useSyncExternalStore,
+  type ReactNode,
+} from 'react'
+import { AppState } from 'react-native'
 
-import {
-  createSessionSchema,
-  refreshTokensSchema,
-  toSessionUser,
-  type SessionUser,
-} from '@/features/auth/api/schemas'
-import {
-  CreateSessionDocument,
-  PersonAccountByPersonIdDocument,
-  RefreshTokenClientSideDocument,
-  SignOutDocument,
-} from '@/features/auth/api/operations'
-import { canAccessApp } from '@/features/auth/access-policy'
-import { AccessDeniedError } from '@/features/auth/errors'
-import {
-  initialSessionState,
-  sessionReducer,
-  type SignOutReason,
-} from '@/features/auth/session/session-reducer'
-import { clearStoredSession, loadStoredSession, saveStoredSession } from '@/features/auth/session/session-storage'
-import { isAccessTokenExpired } from '@/features/auth/session/token'
-import { tokenMemory } from '@/features/auth/session/token-memory'
+import { authApi } from '@/features/auth/api/auth-api'
+import type { SessionUser, SessionTokens } from '@/features/auth/api/schemas'
+import { initialSessionState, sessionReducer, type SignOutReason } from './session-reducer'
+import { clearStoredSession, loadStoredSession, saveStoredSession } from './session-storage'
+import { readTokenExpiration } from './token'
+import { tokenMemory } from './token-memory'
 import { setAuthBridge, type RefreshResult } from '@/lib/graphql/auth-bridge'
-import { executeGraphql } from '@/lib/graphql/client'
 import { AppError } from '@/lib/graphql/errors'
 import { queryClient as defaultQueryClient } from '@/lib/query/query-client'
 
+const IDENTITY_KEY = ['session', 'identity'] as const
+
 type SessionContextValue = {
-  status: 'restoring' | 'signedOut' | 'signedIn'
+  status: 'restoring' | 'signedOut' | 'signedIn' | 'recovery'
   user: SessionUser | null
   signOutReason: SignOutReason
-  isOffline: boolean
+  recoveryMessage: string | null
+  retry: () => Promise<void>
   signIn: (email: string, password: string) => Promise<void>
   signOut: () => Promise<void>
 }
-
 const SessionContext = createContext<SessionContextValue | null>(null)
 
-type SessionProviderProps = {
+export function SessionProvider({
+  children,
+  client = defaultQueryClient,
+}: {
   children: ReactNode
   client?: QueryClient
-}
-
-export function SessionProvider({ children, client = defaultQueryClient }: SessionProviderProps) {
+}) {
   const [state, dispatch] = useReducer(sessionReducer, initialSessionState)
-  const [isOffline, setIsOffline] = useReducer((_: boolean, next: boolean) => next, false)
-  const clientRef = useRef(client)
-  const userRef = useRef<SessionUser | null>(null)
+  const [tokenRevision, updateTokenRevision] = useReducer((value: number) => value + 1, 0)
+  const generation = useRef(0)
+  const mounted = useRef(true)
+  const storageQueue = useRef<Promise<unknown>>(Promise.resolve())
+  const refreshFlight = useRef<Promise<RefreshResult> | null>(null)
+  const loginFlight = useRef<Promise<void> | null>(null)
+  const restoreFlight = useRef<{ epoch: number; promise: Promise<void> } | null>(null)
+  const recovery = useRef<'restore' | 'signOut'>('restore')
+  const recoveryRefresh = useRef<string | null>(null)
+  const current = useCallback(
+    (epoch: number) => mounted.current && epoch === generation.current,
+    [],
+  )
+  const user = useSyncExternalStore(
+    useCallback((notify) => client.getQueryCache().subscribe(notify), [client]),
+    useCallback(() => client.getQueryData<SessionUser>(IDENTITY_KEY) ?? null, [client]),
+    () => null,
+  )
 
-  useEffect(() => {
-    clientRef.current = client
-  }, [client])
+  const serializeStorage = useCallback(<T,>(task: () => Promise<T>): Promise<T> => {
+    const pending = storageQueue.current.catch(() => undefined).then(task)
+    storageQueue.current = pending
+    return pending
+  }, [])
 
-  const refreshSession = useCallback(async (): Promise<RefreshResult> => {
-    const currentRefresh = tokenMemory.getRefresh()
-    if (!currentRefresh) return 'unauthenticated'
-
-    try {
-      const data = await executeGraphql(
-        RefreshTokenClientSideDocument,
-        { data: { refreshToken: currentRefresh } },
-        { authenticated: false },
-      )
-      const parsed = refreshTokensSchema.safeParse(data.refreshTokenClientSide)
-      if (!parsed.success || !parsed.data.refreshToken) return 'unauthenticated'
-
-      tokenMemory.set(parsed.data.accessToken, parsed.data.refreshToken)
-      if (userRef.current) {
-        await saveStoredSession({
-          accessToken: parsed.data.accessToken,
-          refreshToken: parsed.data.refreshToken,
-          user: userRef.current,
-        })
+  const reset = useCallback(
+    async (reason: SignOutReason) => {
+      const epoch = ++generation.current
+      tokenMemory.clear()
+      await client.cancelQueries()
+      client.clear()
+      recoveryRefresh.current = null
+      // Block protected routes even if deleting the persisted credential fails.
+      recovery.current = 'signOut'
+      dispatch({ type: 'restoring' })
+      try {
+        await serializeStorage(clearStoredSession)
+        if (current(epoch)) {
+          dispatch({ type: 'signedOut', reason })
+          return true
+        }
+      } catch {
+        if (current(epoch))
+          dispatch({
+            type: 'recovery',
+            message: 'Não foi possível apagar a sessão salva. Tente sair novamente.',
+          })
       }
-      return 'refreshed'
-    } catch (error) {
-      if (error instanceof AppError && (error.type === 'network' || error.type === 'timeout')) {
+      return false
+    },
+    [client, current, serializeStorage],
+  )
+
+  const publish = useCallback(
+    async (tokens: SessionTokens, identity: SessionUser, epoch: number) => {
+      if (!current(epoch)) return
+      if (readTokenExpiration(tokens.accessToken) === null)
+        throw new AppError('invalid_response', 'Resposta inesperada do servidor.')
+      await serializeStorage(async () => {
+        if (current(epoch)) await saveStoredSession(tokens.refreshToken)
+      })
+      if (!current(epoch)) return
+      tokenMemory.set(tokens.accessToken, tokens.refreshToken)
+      recoveryRefresh.current = null
+      client.setQueryData(IDENTITY_KEY, identity)
+      updateTokenRevision()
+      dispatch({ type: 'signedIn' })
+    },
+    [client, current, serializeStorage],
+  )
+
+  const refreshSession = useCallback((): Promise<RefreshResult> => {
+    if (refreshFlight.current) return refreshFlight.current
+    const epoch = generation.current
+    const refreshToken = tokenMemory.getRefresh()
+    if (!refreshToken) return Promise.resolve('unauthenticated')
+    const run = async (): Promise<RefreshResult> => {
+      recoveryRefresh.current = refreshToken
+      let next: SessionTokens | null = null
+      try {
+        next = await authApi.refresh(refreshToken)
+        if (!current(epoch)) return 'unavailable'
+        // Keep the rotated credential available for recovery if identity validation fails.
+        recoveryRefresh.current = next.refreshToken
+        await serializeStorage(async () => {
+          if (current(epoch)) await saveStoredSession(next!.refreshToken)
+        })
+        if (!current(epoch)) return 'unavailable'
+        tokenMemory.set(next.accessToken, next.refreshToken)
+        const identity = await authApi.me(next.accessToken)
+        await publish(next, identity, epoch)
+        return current(epoch) ? 'refreshed' : 'unavailable'
+      } catch (error) {
+        if (!current(epoch)) return 'unavailable'
+        if (error instanceof AppError && error.type === 'unauthenticated') return 'unauthenticated'
+        recovery.current = 'restore'
+        tokenMemory.clear()
+        await client.cancelQueries()
+        client.clear()
+        dispatch({
+          type: 'recovery',
+          message: 'Não foi possível confirmar sua sessão. Tente novamente ou saia da conta.',
+        })
         return 'unavailable'
       }
-      return 'unauthenticated'
     }
-  }, [])
-
-  const invalidate = useCallback(async () => {
-    userRef.current = null
-    tokenMemory.clear()
-    await clearStoredSession()
-    clientRef.current.clear()
-    dispatch({ type: 'expired' })
-  }, [])
+    const pending = run().finally(() => {
+      if (refreshFlight.current === pending) refreshFlight.current = null
+    })
+    refreshFlight.current = pending
+    return pending
+  }, [client, current, publish, serializeStorage])
 
   const signOut = useCallback(async () => {
-    const personId = userRef.current?.id ?? null
-    userRef.current = null
-    tokenMemory.clear()
-    await clearStoredSession()
-    clientRef.current.clear()
-    dispatch({ type: 'signedOut', reason: 'signedOut' })
-    if (!personId) return
-    void executeGraphql(SignOutDocument, { personId }, { authenticated: false }).catch(() => undefined)
-  }, [])
+    const refreshToken = tokenMemory.getRefresh() ?? recoveryRefresh.current
+    // Clearing local access does not depend on the network being available.
+    const revoked = refreshToken
+      ? authApi.revoke(refreshToken).then(
+          () => true,
+          () => false,
+        )
+      : Promise.resolve(true)
+    const epoch = generation.current + 1
+    const cleared = await reset('signedOut')
+    if (!(await revoked) && cleared && current(epoch))
+      dispatch({ type: 'signedOut', reason: 'localOnly' })
+  }, [reset, current])
 
-  const signIn = useCallback(async (email: string, password: string) => {
-    const data = await executeGraphql(
-      CreateSessionDocument,
-      { data: { email: email.trim(), password } },
-      { authenticated: false },
-    )
-    const parsed = createSessionSchema.safeParse(data.createSession)
-    if (!parsed.success) {
-      throw new AppError('invalid_response', 'Resposta inesperada do servidor')
-    }
-
-    const user = toSessionUser(parsed.data.person)
-    if (!canAccessApp(user)) throw new AccessDeniedError()
-
-    userRef.current = user
-    tokenMemory.set(parsed.data.token, parsed.data.refreshToken)
-    try {
-      await saveStoredSession({
-        accessToken: parsed.data.token,
-        refreshToken: parsed.data.refreshToken,
-        user,
+  const signIn = useCallback(
+    (email: string, password: string): Promise<void> => {
+      if (loginFlight.current) return loginFlight.current
+      const epoch = ++generation.current
+      const run = async () => {
+        const data = await authApi.signIn(email.trim(), password)
+        if (!current(epoch)) {
+          void authApi.revoke(data.refreshToken).catch(() => undefined)
+          return
+        }
+        try {
+          await publish(data, data.person, epoch)
+        } catch (error) {
+          void authApi.revoke(data.refreshToken).catch(() => undefined)
+          if (current(epoch)) {
+            tokenMemory.clear()
+            try {
+              await serializeStorage(clearStoredSession)
+            } catch {
+              recovery.current = 'signOut'
+              dispatch({
+                type: 'recovery',
+                message: 'Não foi possível apagar a sessão salva. Tente sair novamente.',
+              })
+            }
+          }
+          throw error
+        }
+      }
+      const pending = run().finally(() => {
+        if (loginFlight.current === pending) loginFlight.current = null
       })
-    } catch (error) {
-      userRef.current = null
-      tokenMemory.clear()
-      throw error
-    }
+      loginFlight.current = pending
+      return pending
+    },
+    [current, publish, serializeStorage],
+  )
 
-    setIsOffline(false)
-    dispatch({ type: 'signedIn', user })
-  }, [])
+  const restore = useCallback((): Promise<void> => {
+    if (restoreFlight.current && current(restoreFlight.current.epoch))
+      return restoreFlight.current.promise
+    const epoch = ++generation.current
+    recovery.current = 'restore'
+    dispatch({ type: 'restoring' })
+    const run = async () => {
+      try {
+        const stored = await serializeStorage(loadStoredSession)
+        if (!current(epoch)) return
+        const refreshToken = recoveryRefresh.current ?? stored?.refreshToken
+        if (!refreshToken) {
+          dispatch({ type: 'signedOut', reason: null })
+          return
+        }
+        recoveryRefresh.current = refreshToken
+        const tokens = await authApi.refresh(refreshToken)
+        if (!current(epoch)) return
+        recoveryRefresh.current = tokens.refreshToken
+        await serializeStorage(async () => {
+          if (current(epoch)) await saveStoredSession(tokens.refreshToken)
+        })
+        if (!current(epoch)) return
+        const identity = await authApi.me(tokens.accessToken)
+        await publish(tokens, identity, epoch)
+      } catch (error) {
+        if (!current(epoch)) return
+        if (error instanceof AppError && error.type === 'unauthenticated') {
+          await reset('expired')
+          return
+        }
+        dispatch({
+          type: 'recovery',
+          message:
+            error instanceof AppError && error.type === 'storage'
+              ? error.message
+              : 'Não foi possível confirmar sua sessão. Verifique a conexão e tente novamente.',
+        })
+      }
+    }
+    const promise = run().finally(() => {
+      if (restoreFlight.current?.epoch === epoch) restoreFlight.current = null
+    })
+    restoreFlight.current = { epoch, promise }
+    return promise
+  }, [current, publish, reset, serializeStorage])
+
+  useEffect(() => {
+    mounted.current = true
+    tokenMemory.clear()
+    void restore()
+    return () => {
+      mounted.current = false
+      generation.current += 1
+      tokenMemory.clear()
+      client.clear()
+    }
+  }, [restore, client])
 
   useEffect(() => {
     setAuthBridge({
       getAccessToken: () => tokenMemory.getAccess(),
+      getSessionVersion: () => generation.current,
       refreshSession,
       onSessionInvalid: () => {
-        void invalidate()
+        void reset('expired')
       },
     })
     return () => setAuthBridge(null)
-  }, [invalidate, refreshSession])
+  }, [refreshSession, reset])
 
   useEffect(() => {
-    let cancelled = false
-
-    async function validateAccount(user: SessionUser) {
-      try {
-        const data = await executeGraphql(PersonAccountByPersonIdDocument, { person_id: user.id })
-        if (cancelled) return
-        if (data.personAccountByPersonId.status === 'INACTIVE') {
-          await invalidate()
-          return
-        }
-        setIsOffline(false)
-      } catch (error) {
-        if (cancelled) return
-        if (error instanceof AppError && (error.type === 'network' || error.type === 'timeout')) {
-          setIsOffline(true)
-        }
+    if (state.status !== 'signedIn') return
+    const epoch = generation.current
+    const check = () => {
+      if (!current(epoch)) return
+      const expiration = readTokenExpiration(tokenMemory.getAccess() ?? '')
+      if (expiration === null || expiration * 1000 - Date.now() <= 30_000) {
+        void refreshSession().then((result) => {
+          if (current(epoch) && result === 'unauthenticated') void reset('expired')
+        })
       }
     }
-
-    async function restore() {
-      const stored = await loadStoredSession()
-      if (cancelled) return
-      if (!stored) {
-        dispatch({ type: 'signedOut', reason: null })
-        return
-      }
-
-      userRef.current = stored.user
-      tokenMemory.set(stored.accessToken, stored.refreshToken)
-
-      if (isAccessTokenExpired(stored.accessToken)) {
-        const result = await refreshSession()
-        if (cancelled) return
-        if (result === 'unauthenticated') {
-          await invalidate()
-          return
-        }
-        if (result === 'unavailable') {
-          setIsOffline(true)
-          dispatch({ type: 'restored', user: stored.user })
-          return
-        }
-      }
-
-      if (cancelled) return
-      dispatch({ type: 'restored', user: stored.user })
-      void validateAccount(stored.user)
-    }
-
-    void restore()
+    const expiration = readTokenExpiration(tokenMemory.getAccess() ?? '')
+    const delay = Math.min(
+      2_147_000_000,
+      Math.max(1000, (expiration ?? 0) * 1000 - Date.now() - 30_000),
+    )
+    const timer = setTimeout(check, delay)
+    const subscription = AppState.addEventListener('change', (status) => {
+      if (status === 'active') check()
+    })
     return () => {
-      cancelled = true
+      clearTimeout(timer)
+      subscription.remove()
     }
-  }, [invalidate, refreshSession])
+  }, [state.status, tokenRevision, refreshSession, reset, current])
 
-  const value: SessionContextValue = {
-    status: state.status,
-    user: state.status === 'signedIn' ? state.user : null,
-    signOutReason: state.status === 'signedOut' ? state.reason : null,
-    isOffline,
-    signIn,
-    signOut,
-  }
-
-  return <SessionContext value={value}>{children}</SessionContext>
+  return (
+    <SessionContext
+      value={{
+        status: state.status,
+        user: state.status === 'signedIn' ? user : null,
+        signOutReason: state.status === 'signedOut' ? state.reason : null,
+        recoveryMessage: state.status === 'recovery' ? state.message : null,
+        retry: () => (recovery.current === 'signOut' ? signOut() : restore()),
+        signIn,
+        signOut,
+      }}
+    >
+      {children}
+    </SessionContext>
+  )
 }
-
 export function useSession() {
   const value = use(SessionContext)
-  if (!value) {
-    throw new Error('useSession deve ser usado dentro de SessionProvider')
-  }
+  if (!value) throw new Error('useSession deve ser usado dentro de SessionProvider')
   return value
 }

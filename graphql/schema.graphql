@@ -1708,6 +1708,7 @@ type Query {
   getPlaceBillingsByCondo(condoId: String!): [PlaceBillingViewModel!]!
   getPlaceBillingsByPlace(placeId: String!): [PlaceBillingViewModel!]!
   getPlaceBillingsByPlaceChecklist(placeChecklistId: String!): [PlaceBillingViewModel!]!
+  mobileMe: MobileSessionPerson!
 }
 
 input ListPatrolsInput {
@@ -1987,6 +1988,9 @@ type Mutation {
   createPlaceBilling(data: CreatePlaceBillingInput!): PlaceBillingViewModel!
   updatePlaceBilling(data: UpdatePlaceBillingInput!): PlaceBillingViewModel!
   deletePlaceBilling(placeBillingId: String!): Boolean!
+  createMobileSession(data: CreateAuthInput!): MobileAuth!
+  refreshMobileSession(data: RefreshTokenClientSideInput!): MobileTokens!
+  revokeMobileSession(refreshToken: String!): Boolean!
 }
 
 input CreateBlockInput {
@@ -3485,4 +3489,22 @@ input UpdatePlaceBillingInput {
   placeBillingId: String!
   total: Float
   billingItems: [BillingItemInput!]
+}
+
+type MobileSessionPerson {
+  id: ID!
+  name: String!
+  email: String!
+  status: String!
+}
+
+type MobileTokens {
+  accessToken: String!
+  refreshToken: String!
+}
+
+type MobileAuth {
+  accessToken: String!
+  refreshToken: String!
+  person: MobileSessionPerson!
 }

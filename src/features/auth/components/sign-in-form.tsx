@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import { AccessibilityInfo, StyleSheet, View } from 'react-native'
 
@@ -11,7 +11,7 @@ import { Spacing } from '@/constants/theme'
 
 type SignInFormProps = {
   error?: string | null
-  onSubmit: (values: SignInValues) => Promise<void>
+  onSubmit: (values: SignInValues) => Promise<boolean | void>
 }
 
 export function SignInForm({ error, onSubmit }: SignInFormProps) {
@@ -19,6 +19,19 @@ export function SignInForm({ error, onSubmit }: SignInFormProps) {
     resolver: zodResolver(signInSchema),
     defaultValues: { email: '', password: '' },
   })
+  const submitting = useRef(false)
+  async function submit() {
+    await form.handleSubmit(async (values) => {
+      if (submitting.current) return
+      submitting.current = true
+      try {
+        const success = await onSubmit(values)
+        if (success !== false) form.resetField('password')
+      } finally {
+        submitting.current = false
+      }
+    })()
+  }
 
   useEffect(() => {
     if (error) {
@@ -34,6 +47,7 @@ export function SignInForm({ error, onSubmit }: SignInFormProps) {
         render={({ field, fieldState }) => (
           <TextField
             label="E-mail"
+            ref={field.ref}
             autoCapitalize="none"
             autoComplete="email"
             autoCorrect={false}
@@ -55,6 +69,7 @@ export function SignInForm({ error, onSubmit }: SignInFormProps) {
         render={({ field, fieldState }) => (
           <TextField
             label="Senha"
+            ref={field.ref}
             autoCapitalize="none"
             autoComplete="password"
             autoCorrect={false}
@@ -62,7 +77,7 @@ export function SignInForm({ error, onSubmit }: SignInFormProps) {
             onBlur={field.onBlur}
             onChangeText={field.onChange}
             onSubmitEditing={() => {
-              void form.handleSubmit(onSubmit)()
+              void submit()
             }}
             returnKeyType="done"
             secureToggle
@@ -80,7 +95,7 @@ export function SignInForm({ error, onSubmit }: SignInFormProps) {
         label="Entrar"
         loading={form.formState.isSubmitting}
         onPress={() => {
-          void form.handleSubmit(onSubmit)()
+          void submit()
         }}
       />
     </View>

@@ -10,7 +10,9 @@ export function readTokenExpiration(token: string): number | null {
 
   try {
     const decoded = JSON.parse(decodeBase64Url(payload)) as { exp?: unknown }
-    return typeof decoded.exp === 'number' ? decoded.exp : null
+    return typeof decoded.exp === 'number' && Number.isFinite(decoded.exp) && decoded.exp > 0
+      ? decoded.exp
+      : null
   } catch {
     return null
   }
@@ -18,6 +20,6 @@ export function readTokenExpiration(token: string): number | null {
 
 export function isAccessTokenExpired(token: string, nowMs = Date.now()) {
   const expiration = readTokenExpiration(token)
-  if (expiration == null) return false
+  if (expiration == null) return true
   return expiration * 1000 <= nowMs
 }

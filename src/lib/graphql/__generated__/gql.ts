@@ -15,46 +15,34 @@ import * as types from './graphql';
  * Learn more about it here: https://the-guild.dev/graphql/codegen/plugins/presets/preset-client#reducing-bundle-size
  */
 type Documents = {
-    "\n  mutation CreateSession($data: CreateAuthInput!) {\n    createSession(data: $data) {\n      token\n      refreshToken\n      person {\n        id\n        name\n        email\n        status\n        createdByPersonId\n        isEmployee\n        showPanel\n        personContext {\n          profile {\n            slug\n          }\n        }\n      }\n    }\n  }\n": typeof types.CreateSessionDocument,
-    "\n  mutation RefreshTokenClientSide($data: RefreshTokenClientSideInput!) {\n    refreshTokenClientSide(data: $data) {\n      accessToken\n      refreshToken\n    }\n  }\n": typeof types.RefreshTokenClientSideDocument,
-    "\n  mutation SignOut($personId: String!) {\n    signOut(personId: $personId)\n  }\n": typeof types.SignOutDocument,
-    "\n  query PersonAccountByPersonId($person_id: String!) {\n    personAccountByPersonId(person_id: $person_id) {\n      status\n    }\n  }\n": typeof types.PersonAccountByPersonIdDocument,
-    "\n  query GetCondosByPerson($person_id: String!) {\n    getCondosByPerson(person_id: $person_id) {\n      id\n      name\n      phone\n      document\n      status\n    }\n  }\n": typeof types.GetCondosByPersonDocument,
-    "\n  query FetchCondosPersonHasAccess($person_id: String!, $created_by_person_id: String!) {\n    fetchCondosPersonHasAccess(person_id: $person_id, created_by_person_id: $created_by_person_id) {\n      id\n      name\n      phone\n      document\n      status\n    }\n  }\n": typeof types.FetchCondosPersonHasAccessDocument,
+    "\n  mutation CreateMobileSession($data: CreateAuthInput!) {\n    createMobileSession(data: $data) {\n      accessToken\n      refreshToken\n      person {\n        id\n        name\n        email\n        status\n      }\n    }\n  }\n": typeof types.CreateMobileSessionDocument,
+    "\n  mutation RefreshMobileSession($data: RefreshTokenClientSideInput!) {\n    refreshMobileSession(data: $data) {\n      accessToken\n      refreshToken\n    }\n  }\n": typeof types.RefreshMobileSessionDocument,
+    "\n  mutation RevokeMobileSession($refreshToken: String!) {\n    revokeMobileSession(refreshToken: $refreshToken)\n  }\n": typeof types.RevokeMobileSessionDocument,
+    "\n  query MobileMe {\n    mobileMe {\n      id\n      name\n      email\n      status\n    }\n  }\n": typeof types.MobileMeDocument,
 };
 const documents: Documents = {
-    "\n  mutation CreateSession($data: CreateAuthInput!) {\n    createSession(data: $data) {\n      token\n      refreshToken\n      person {\n        id\n        name\n        email\n        status\n        createdByPersonId\n        isEmployee\n        showPanel\n        personContext {\n          profile {\n            slug\n          }\n        }\n      }\n    }\n  }\n": types.CreateSessionDocument,
-    "\n  mutation RefreshTokenClientSide($data: RefreshTokenClientSideInput!) {\n    refreshTokenClientSide(data: $data) {\n      accessToken\n      refreshToken\n    }\n  }\n": types.RefreshTokenClientSideDocument,
-    "\n  mutation SignOut($personId: String!) {\n    signOut(personId: $personId)\n  }\n": types.SignOutDocument,
-    "\n  query PersonAccountByPersonId($person_id: String!) {\n    personAccountByPersonId(person_id: $person_id) {\n      status\n    }\n  }\n": types.PersonAccountByPersonIdDocument,
-    "\n  query GetCondosByPerson($person_id: String!) {\n    getCondosByPerson(person_id: $person_id) {\n      id\n      name\n      phone\n      document\n      status\n    }\n  }\n": types.GetCondosByPersonDocument,
-    "\n  query FetchCondosPersonHasAccess($person_id: String!, $created_by_person_id: String!) {\n    fetchCondosPersonHasAccess(person_id: $person_id, created_by_person_id: $created_by_person_id) {\n      id\n      name\n      phone\n      document\n      status\n    }\n  }\n": types.FetchCondosPersonHasAccessDocument,
+    "\n  mutation CreateMobileSession($data: CreateAuthInput!) {\n    createMobileSession(data: $data) {\n      accessToken\n      refreshToken\n      person {\n        id\n        name\n        email\n        status\n      }\n    }\n  }\n": types.CreateMobileSessionDocument,
+    "\n  mutation RefreshMobileSession($data: RefreshTokenClientSideInput!) {\n    refreshMobileSession(data: $data) {\n      accessToken\n      refreshToken\n    }\n  }\n": types.RefreshMobileSessionDocument,
+    "\n  mutation RevokeMobileSession($refreshToken: String!) {\n    revokeMobileSession(refreshToken: $refreshToken)\n  }\n": types.RevokeMobileSessionDocument,
+    "\n  query MobileMe {\n    mobileMe {\n      id\n      name\n      email\n      status\n    }\n  }\n": types.MobileMeDocument,
 };
 
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n  mutation CreateSession($data: CreateAuthInput!) {\n    createSession(data: $data) {\n      token\n      refreshToken\n      person {\n        id\n        name\n        email\n        status\n        createdByPersonId\n        isEmployee\n        showPanel\n        personContext {\n          profile {\n            slug\n          }\n        }\n      }\n    }\n  }\n"): typeof import('./graphql').CreateSessionDocument;
+export function graphql(source: "\n  mutation CreateMobileSession($data: CreateAuthInput!) {\n    createMobileSession(data: $data) {\n      accessToken\n      refreshToken\n      person {\n        id\n        name\n        email\n        status\n      }\n    }\n  }\n"): typeof import('./graphql').CreateMobileSessionDocument;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n  mutation RefreshTokenClientSide($data: RefreshTokenClientSideInput!) {\n    refreshTokenClientSide(data: $data) {\n      accessToken\n      refreshToken\n    }\n  }\n"): typeof import('./graphql').RefreshTokenClientSideDocument;
+export function graphql(source: "\n  mutation RefreshMobileSession($data: RefreshTokenClientSideInput!) {\n    refreshMobileSession(data: $data) {\n      accessToken\n      refreshToken\n    }\n  }\n"): typeof import('./graphql').RefreshMobileSessionDocument;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n  mutation SignOut($personId: String!) {\n    signOut(personId: $personId)\n  }\n"): typeof import('./graphql').SignOutDocument;
+export function graphql(source: "\n  mutation RevokeMobileSession($refreshToken: String!) {\n    revokeMobileSession(refreshToken: $refreshToken)\n  }\n"): typeof import('./graphql').RevokeMobileSessionDocument;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n  query PersonAccountByPersonId($person_id: String!) {\n    personAccountByPersonId(person_id: $person_id) {\n      status\n    }\n  }\n"): typeof import('./graphql').PersonAccountByPersonIdDocument;
-/**
- * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
- */
-export function graphql(source: "\n  query GetCondosByPerson($person_id: String!) {\n    getCondosByPerson(person_id: $person_id) {\n      id\n      name\n      phone\n      document\n      status\n    }\n  }\n"): typeof import('./graphql').GetCondosByPersonDocument;
-/**
- * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
- */
-export function graphql(source: "\n  query FetchCondosPersonHasAccess($person_id: String!, $created_by_person_id: String!) {\n    fetchCondosPersonHasAccess(person_id: $person_id, created_by_person_id: $created_by_person_id) {\n      id\n      name\n      phone\n      document\n      status\n    }\n  }\n"): typeof import('./graphql').FetchCondosPersonHasAccessDocument;
+export function graphql(source: "\n  query MobileMe {\n    mobileMe {\n      id\n      name\n      email\n      status\n    }\n  }\n"): typeof import('./graphql').MobileMeDocument;
 
 
 export function graphql(source: string) {

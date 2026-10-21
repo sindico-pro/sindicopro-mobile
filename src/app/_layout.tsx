@@ -9,7 +9,10 @@ import { useFonts } from 'expo-font'
 import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from 'expo-router'
 import * as SplashScreen from 'expo-splash-screen'
 import { useEffect } from 'react'
-import { useColorScheme } from 'react-native'
+import { View, useColorScheme } from 'react-native'
+import { Screen } from '@/components/ui/screen'
+import { StateView } from '@/components/ui/state-view'
+import { Button } from '@/components/ui/button'
 
 import { SessionProvider, useSession } from '@/features/auth/session/session-provider'
 import { bindQueryLifecycle, queryClient } from '@/lib/query/query-client'
@@ -28,7 +31,7 @@ export default function RootLayout() {
 
 function RootNavigator() {
   const colorScheme = useColorScheme()
-  const { status } = useSession()
+  const { status, recoveryMessage, retry, signOut } = useSession()
   const [fontsLoaded, fontError] = useFonts({
     MavenPro_400Regular,
     MavenPro_500Medium,
@@ -37,7 +40,7 @@ function RootNavigator() {
   })
 
   useEffect(() => {
-    bindQueryLifecycle()
+    return bindQueryLifecycle()
   }, [])
 
   const ready = (fontsLoaded || fontError != null) && status !== 'restoring'
@@ -49,6 +52,28 @@ function RootNavigator() {
   }, [ready])
 
   if (!ready) return null
+
+  if (status === 'recovery') {
+    return (
+      <Screen>
+        <View style={{ flex: 1, justifyContent: 'center', padding: 24 }}>
+          <StateView
+            error={recoveryMessage}
+            onRetry={() => {
+              void retry()
+            }}
+          />
+          <Button
+            label="Sair da conta"
+            onPress={() => {
+              void signOut()
+            }}
+            variant="ghost"
+          />
+        </View>
+      </Screen>
+    )
+  }
 
   const signedIn = status === 'signedIn'
   const baseTheme = colorScheme === 'dark' ? DarkTheme : DefaultTheme

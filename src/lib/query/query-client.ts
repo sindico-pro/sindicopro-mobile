@@ -26,31 +26,30 @@ export function createQueryClient() {
 
 export const queryClient = createQueryClient()
 
-let lifecycleBound = false
-
 export function bindQueryLifecycle() {
-  if (lifecycleBound) return
-  lifecycleBound = true
-
-  if (typeof Network.addNetworkStateListener === 'function') {
-    onlineManager.setEventListener((setOnline) => {
-      const subscription = Network.addNetworkStateListener((state) => {
-        setOnline(Boolean(state.isConnected) && state.isInternetReachable !== false)
+  onlineManager.setEventListener((setOnline) => {
+    let changed = false
+    const subscription = Network.addNetworkStateListener((state) => {
+      changed = true
+      setOnline(state.isConnected !== false && state.isInternetReachable !== false)
+    })
+    void Network.getNetworkStateAsync()
+      .then((state) => {
+        if (!changed) setOnline(state.isConnected !== false && state.isInternetReachable !== false)
       })
-      return () => {
-        if (typeof subscription?.remove === 'function') subscription.remove()
-      }
+      .catch(() => undefined)
+    return () => subscription.remove()
+  })
+  if (Platform.OS !== 'web') {
+    focusManager.setEventListener((setFocused) => {
+      const subscription = AppState.addEventListener('change', (status) =>
+        setFocused(status === 'active'),
+      )
+      return () => subscription.remove()
     })
   }
-
-  if (Platform.OS === 'web') return
-
-  focusManager.setEventListener((setFocused) => {
-    const subscription = AppState.addEventListener('change', (status) => {
-      setFocused(status === 'active')
-    })
-    return () => {
-      if (typeof subscription?.remove === 'function') subscription.remove()
-    }
-  })
+  return () => {
+    onlineManager.setEventListener(() => () => undefined)
+    if (Platform.OS !== 'web') focusManager.setEventListener(() => () => undefined)
+  }
 }

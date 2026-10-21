@@ -13,48 +13,31 @@ export type RefreshTokenClientSideInput = {
   refreshToken: string;
 };
 
-export type CreateSessionMutationVariables = Exact<{
+export type CreateMobileSessionMutationVariables = Exact<{
   data: CreateAuthInput;
 }>;
 
 
-export type CreateSessionMutation = { createSession: { token: string, refreshToken: string, person: { id: string, name: string, email: string, status: string, createdByPersonId: string | null, isEmployee: boolean | null, showPanel: boolean | null, personContext: Array<{ profile: { slug: string } }> } } };
+export type CreateMobileSessionMutation = { createMobileSession: { accessToken: string, refreshToken: string, person: { id: string, name: string, email: string, status: string } } };
 
-export type RefreshTokenClientSideMutationVariables = Exact<{
+export type RefreshMobileSessionMutationVariables = Exact<{
   data: RefreshTokenClientSideInput;
 }>;
 
 
-export type RefreshTokenClientSideMutation = { refreshTokenClientSide: { accessToken: string, refreshToken: string | null } };
+export type RefreshMobileSessionMutation = { refreshMobileSession: { accessToken: string, refreshToken: string } };
 
-export type SignOutMutationVariables = Exact<{
-  personId: string;
+export type RevokeMobileSessionMutationVariables = Exact<{
+  refreshToken: string;
 }>;
 
 
-export type SignOutMutation = { signOut: boolean };
+export type RevokeMobileSessionMutation = { revokeMobileSession: boolean };
 
-export type PersonAccountByPersonIdQueryVariables = Exact<{
-  person_id: string;
-}>;
+export type MobileMeQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type PersonAccountByPersonIdQuery = { personAccountByPersonId: { status: string } };
-
-export type GetCondosByPersonQueryVariables = Exact<{
-  person_id: string;
-}>;
-
-
-export type GetCondosByPersonQuery = { getCondosByPerson: Array<{ id: string, name: string, phone: string, document: string, status: string }> };
-
-export type FetchCondosPersonHasAccessQueryVariables = Exact<{
-  person_id: string;
-  created_by_person_id: string;
-}>;
-
-
-export type FetchCondosPersonHasAccessQuery = { fetchCondosPersonHasAccess: Array<{ id: string, name: string, phone: string, document: string, status: string }> };
+export type MobileMeQuery = { mobileMe: { id: string, name: string, email: string, status: string } };
 
 export class TypedDocumentString<TResult, TVariables>
   extends String
@@ -75,70 +58,40 @@ export class TypedDocumentString<TResult, TVariables>
   }
 }
 
-export const CreateSessionDocument = new TypedDocumentString(`
-    mutation CreateSession($data: CreateAuthInput!) {
-  createSession(data: $data) {
-    token
+export const CreateMobileSessionDocument = new TypedDocumentString(`
+    mutation CreateMobileSession($data: CreateAuthInput!) {
+  createMobileSession(data: $data) {
+    accessToken
     refreshToken
     person {
       id
       name
       email
       status
-      createdByPersonId
-      isEmployee
-      showPanel
-      personContext {
-        profile {
-          slug
-        }
-      }
     }
   }
 }
-    `) as unknown as TypedDocumentString<CreateSessionMutation, CreateSessionMutationVariables>;
-export const RefreshTokenClientSideDocument = new TypedDocumentString(`
-    mutation RefreshTokenClientSide($data: RefreshTokenClientSideInput!) {
-  refreshTokenClientSide(data: $data) {
+    `) as unknown as TypedDocumentString<CreateMobileSessionMutation, CreateMobileSessionMutationVariables>;
+export const RefreshMobileSessionDocument = new TypedDocumentString(`
+    mutation RefreshMobileSession($data: RefreshTokenClientSideInput!) {
+  refreshMobileSession(data: $data) {
     accessToken
     refreshToken
   }
 }
-    `) as unknown as TypedDocumentString<RefreshTokenClientSideMutation, RefreshTokenClientSideMutationVariables>;
-export const SignOutDocument = new TypedDocumentString(`
-    mutation SignOut($personId: String!) {
-  signOut(personId: $personId)
+    `) as unknown as TypedDocumentString<RefreshMobileSessionMutation, RefreshMobileSessionMutationVariables>;
+export const RevokeMobileSessionDocument = new TypedDocumentString(`
+    mutation RevokeMobileSession($refreshToken: String!) {
+  revokeMobileSession(refreshToken: $refreshToken)
 }
-    `) as unknown as TypedDocumentString<SignOutMutation, SignOutMutationVariables>;
-export const PersonAccountByPersonIdDocument = new TypedDocumentString(`
-    query PersonAccountByPersonId($person_id: String!) {
-  personAccountByPersonId(person_id: $person_id) {
-    status
-  }
-}
-    `) as unknown as TypedDocumentString<PersonAccountByPersonIdQuery, PersonAccountByPersonIdQueryVariables>;
-export const GetCondosByPersonDocument = new TypedDocumentString(`
-    query GetCondosByPerson($person_id: String!) {
-  getCondosByPerson(person_id: $person_id) {
+    `) as unknown as TypedDocumentString<RevokeMobileSessionMutation, RevokeMobileSessionMutationVariables>;
+export const MobileMeDocument = new TypedDocumentString(`
+    query MobileMe {
+  mobileMe {
     id
     name
-    phone
-    document
+    email
     status
   }
 }
-    `) as unknown as TypedDocumentString<GetCondosByPersonQuery, GetCondosByPersonQueryVariables>;
-export const FetchCondosPersonHasAccessDocument = new TypedDocumentString(`
-    query FetchCondosPersonHasAccess($person_id: String!, $created_by_person_id: String!) {
-  fetchCondosPersonHasAccess(
-    person_id: $person_id
-    created_by_person_id: $created_by_person_id
-  ) {
-    id
-    name
-    phone
-    document
-    status
-  }
-}
-    `) as unknown as TypedDocumentString<FetchCondosPersonHasAccessQuery, FetchCondosPersonHasAccessQueryVariables>;
+    `) as unknown as TypedDocumentString<MobileMeQuery, MobileMeQueryVariables>;

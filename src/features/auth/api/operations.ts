@@ -1,46 +1,41 @@
 import { graphql } from '@/lib/graphql/__generated__/gql'
 
 export const CreateSessionDocument = graphql(`
-  mutation CreateSession($data: CreateAuthInput!) {
-    createSession(data: $data) {
-      token
+  mutation CreateMobileSession($data: CreateAuthInput!) {
+    createMobileSession(data: $data) {
+      accessToken
       refreshToken
       person {
         id
         name
         email
         status
-        createdByPersonId
-        isEmployee
-        showPanel
-        personContext {
-          profile {
-            slug
-          }
-        }
       }
     }
   }
 `)
 
-export const RefreshTokenClientSideDocument = graphql(`
-  mutation RefreshTokenClientSide($data: RefreshTokenClientSideInput!) {
-    refreshTokenClientSide(data: $data) {
+export const RefreshSessionDocument = graphql(`
+  mutation RefreshMobileSession($data: RefreshTokenClientSideInput!) {
+    refreshMobileSession(data: $data) {
       accessToken
       refreshToken
     }
   }
 `)
 
-export const SignOutDocument = graphql(`
-  mutation SignOut($personId: String!) {
-    signOut(personId: $personId)
+export const RevokeSessionDocument = graphql(`
+  mutation RevokeMobileSession($refreshToken: String!) {
+    revokeMobileSession(refreshToken: $refreshToken)
   }
 `)
 
-export const PersonAccountByPersonIdDocument = graphql(`
-  query PersonAccountByPersonId($person_id: String!) {
-    personAccountByPersonId(person_id: $person_id) {
+export const CurrentUserDocument = graphql(`
+  query MobileMe {
+    mobileMe {
+      id
+      name
+      email
       status
     }
   }

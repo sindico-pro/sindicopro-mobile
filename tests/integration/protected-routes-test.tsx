@@ -35,20 +35,22 @@ const user: SessionUser = {
   id: 'person-1',
   name: 'Ana',
   email: 'ana@example.com',
-  isEmployee: false,
-  createdByPersonId: null,
-  showPanel: true,
-  profileSlugs: ['external-condominium-manager'],
   status: 'ACTIVE',
 }
 
 describe('rotas protegidas', () => {
   beforeEach(() => {
     executeGraphql.mockReset()
+    const writes = jest.requireMock('@/features/auth/session/session-storage')
+    writes.saveStoredSession.mockResolvedValue(undefined)
+    writes.clearStoredSession.mockResolvedValue(undefined)
     storage.loadStoredSession.mockReset()
     executeGraphql.mockResolvedValue({
-      personAccountByPersonId: { status: 'ACTIVE' },
-      getCondosByPerson: [],
+      mobileMe: user,
+      refreshMobileSession: {
+        accessToken: tokenWithExpiration(Math.floor(Date.now() / 1000) + 3600),
+        refreshToken: 'rotated',
+      },
     })
   })
 

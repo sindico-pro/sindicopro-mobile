@@ -58,7 +58,8 @@
     "test": "jest --watchAll=false",
     "test:ci": "jest --watchAll=false --ci",
     "codegen": "graphql-codegen --config codegen.ts",
-    "schema:sync": "git -C ../sindico-pro-server show main:src/schema.gql > graphql/schema.graphql"
+    "schema:sync": "node scripts/sync-graphql-schema.mjs",
+    "codegen:check": "graphql-codegen --config codegen.ts --check"
   },
   "private": true
 }

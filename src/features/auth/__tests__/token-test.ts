@@ -11,8 +11,8 @@ describe('token', () => {
     expect(isAccessTokenExpired(valid)).toBe(false)
   })
 
-  it('não considera expirado um token sem exp', () => {
+  it('recusa token sem exp válido', () => {
     expect(readTokenExpiration('sem-pontos')).toBeNull()
-    expect(isAccessTokenExpired('sem-pontos')).toBe(false)
+    expect(isAccessTokenExpired('sem-pontos')).toBe(true)
   })
 })

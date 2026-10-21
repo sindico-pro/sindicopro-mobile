@@ -1,5 +1,5 @@
 import { setAuthBridge } from '@/lib/graphql/auth-bridge'
-import { executeGraphql, resetGraphqlClientForTests } from '@/lib/graphql/client'
+import { executeGraphql } from '@/lib/graphql/client'
 import { appErrorFromGraphqlErrors, readGraphqlData } from '@/lib/graphql/errors'
 
 const protectedDocument = { toString: () => 'query Protected { protected { ok } }' }
@@ -15,12 +15,13 @@ function jsonResponse(body: unknown, status = 200): Response {
 describe('graphql errors', () => {
   it('normaliza UNAUTHENTICATED, FORBIDDEN e payload inválido', () => {
     expect(
-      appErrorFromGraphqlErrors([{ message: 'Unauthorized', extensions: { code: 'UNAUTHENTICATED' } }])
-        .type,
+      appErrorFromGraphqlErrors([
+        { message: 'Unauthorized', extensions: { code: 'UNAUTHENTICATED' } },
+      ]).type,
     ).toBe('unauthenticated')
-    expect(appErrorFromGraphqlErrors([{ message: 'nope', extensions: { code: 'FORBIDDEN' } }]).type).toBe(
-      'forbidden',
-    )
+    expect(
+      appErrorFromGraphqlErrors([{ message: 'nope', extensions: { code: 'FORBIDDEN' } }]).type,
+    ).toBe('forbidden')
     expect(() => readGraphqlData({ data: null })).toThrow(
       expect.objectContaining({ type: 'invalid_response' }),
     )
@@ -32,12 +33,12 @@ describe('graphql errors', () => {
 
 describe('executeGraphql', () => {
   beforeEach(() => {
-    resetGraphqlClientForTests()
     setAuthBridge(null)
   })
 
   it('envia o bearer token', async () => {
     setAuthBridge({
+      getSessionVersion: () => 1,
       getAccessToken: () => 'abc',
       refreshSession: jest.fn(),
       onSessionInvalid: jest.fn(),
@@ -53,13 +54,16 @@ describe('executeGraphql', () => {
   it('não renova a sessão quando o login falha', async () => {
     const refreshSession = jest.fn()
     setAuthBridge({
+      getSessionVersion: () => 1,
       getAccessToken: () => null,
       refreshSession,
       onSessionInvalid: jest.fn(),
     })
     const fetchMock = jest.fn(async () =>
       jsonResponse({
-        errors: [{ message: 'Email or Password Incorrect!', extensions: { code: 'UNAUTHENTICATED' } }],
+        errors: [
+          { message: 'Email or Password Incorrect!', extensions: { code: 'UNAUTHENTICATED' } },
+        ],
       }),
     )
 
@@ -73,61 +77,67 @@ describe('executeGraphql', () => {
     expect(refreshSession).not.toHaveBeenCalled()
   })
 
-  it('faz uma única renovação para requests concorrentes', async () => {
-    let token = 'old'
-    let refreshCalls = 0
+  it('não reenvia mutations após renovação', async () => {
     setAuthBridge({
-      getAccessToken: () => token,
-      refreshSession: async () => {
-        refreshCalls += 1
-        await new Promise((resolve) => setTimeout(resolve, 20))
-        token = 'new'
-        return 'refreshed'
-      },
+      getSessionVersion: () => 1,
+      getAccessToken: () => 'old',
+      refreshSession: async () => 'refreshed',
       onSessionInvalid: jest.fn(),
     })
-    const fetchMock = jest.fn(async (_url: string, init?: RequestInit) => {
-      const authorization = new Headers(init?.headers).get('authorization')
-      if (authorization === 'Bearer new') {
-        return jsonResponse({ data: { protected: { ok: true } } })
-      }
-      return jsonResponse({
-        errors: [{ message: 'Unauthorized', extensions: { code: 'UNAUTHENTICATED' } }],
-      })
+    const fetchMock = jest.fn(async () =>
+      jsonResponse({ errors: [{ extensions: { code: 'UNAUTHENTICATED' } }] }),
+    )
+    await expect(
+      executeGraphql({ toString: () => 'mutation Write { write }' }, undefined, {
+        fetch: fetchMock,
+      }),
+    ).rejects.toMatchObject({ type: 'unauthenticated' })
+    expect(fetchMock).toHaveBeenCalledTimes(1)
+  })
+
+  it('não invalida uma conta nova por resposta de outra geração', async () => {
+    let version = 1
+    const invalid = jest.fn()
+    setAuthBridge({
+      getSessionVersion: () => version,
+      getAccessToken: () => 'token',
+      refreshSession: async () => 'unauthenticated',
+      onSessionInvalid: invalid,
     })
-
-    const [first, second] = await Promise.all([
+    const fetchMock = jest.fn(async () => {
+      version = 2
+      return jsonResponse({ errors: [{ extensions: { code: 'UNAUTHENTICATED' } }] })
+    })
+    await expect(
       executeGraphql(protectedDocument, undefined, { fetch: fetchMock }),
-      executeGraphql(protectedDocument, undefined, { fetch: fetchMock }),
-    ])
-
-    expect(refreshCalls).toBe(1)
-    expect(first).toEqual({ protected: { ok: true } })
-    expect(second).toEqual({ protected: { ok: true } })
+    ).rejects.toMatchObject({ type: 'cancelled' })
+    expect(invalid).not.toHaveBeenCalled()
   })
 
   it('encerra a sessão quando a renovação é recusada', async () => {
     const onSessionInvalid = jest.fn()
     setAuthBridge({
+      getSessionVersion: () => 1,
       getAccessToken: () => 'old',
       refreshSession: async () => 'unauthenticated',
       onSessionInvalid,
     })
     const fetchMock = jest.fn(async () =>
       jsonResponse({
-        errors: [{ message: 'Invalid refreshToken', extensions: { code: 'UNAUTHENTICATED' } }],
+        errors: [{ message: 'Mobile session expired', extensions: { code: 'UNAUTHENTICATED' } }],
       }),
     )
 
-    await expect(executeGraphql(protectedDocument, undefined, { fetch: fetchMock })).rejects.toMatchObject(
-      { type: 'unauthenticated' },
-    )
+    await expect(
+      executeGraphql(protectedDocument, undefined, { fetch: fetchMock }),
+    ).rejects.toMatchObject({ type: 'unauthenticated' })
     expect(onSessionInvalid).toHaveBeenCalledTimes(1)
   })
 
   it('mantém a sessão quando a renovação falha por rede', async () => {
     const onSessionInvalid = jest.fn()
     setAuthBridge({
+      getSessionVersion: () => 1,
       getAccessToken: () => 'old',
       refreshSession: async () => 'unavailable',
       onSessionInvalid,
@@ -138,9 +148,9 @@ describe('executeGraphql', () => {
       }),
     )
 
-    await expect(executeGraphql(protectedDocument, undefined, { fetch: fetchMock })).rejects.toMatchObject(
-      { type: 'network' },
-    )
+    await expect(
+      executeGraphql(protectedDocument, undefined, { fetch: fetchMock }),
+    ).rejects.toMatchObject({ type: 'network' })
     expect(onSessionInvalid).not.toHaveBeenCalled()
   })
 
@@ -185,5 +195,51 @@ describe('executeGraphql', () => {
         }),
       }),
     ).rejects.toMatchObject({ type: 'invalid_response' })
+  })
+})
+
+describe('respostas inesperadas e cancelamento', () => {
+  it.each([{}, { errors: {} }, { errors: [null] }, { data: [] }, { data: null }])(
+    'rejeita envelope malformado %j',
+    (body) => {
+      expect(() => readGraphqlData(body)).toThrow(
+        expect.objectContaining({ type: 'invalid_response' }),
+      )
+    },
+  )
+  it('não aceita dados parciais de operação com erros', () => {
+    expect(() =>
+      readGraphqlData({ data: { token: 'partial' }, errors: [{ message: 'SQL stack' }] }),
+    ).toThrow(
+      expect.objectContaining({
+        type: 'server',
+        message: 'Não foi possível concluir a solicitação. Tente novamente.',
+      }),
+    )
+  })
+  it('não envia requisição já cancelada', async () => {
+    const controller = new AbortController()
+    controller.abort()
+    const request = jest.fn()
+    await expect(
+      executeGraphql(protectedDocument, undefined, {
+        authenticated: false,
+        signal: controller.signal,
+        fetch: request,
+      }),
+    ).rejects.toMatchObject({ type: 'cancelled' })
+    expect(request).not.toHaveBeenCalled()
+  })
+  it.each([
+    [401, 'unauthenticated'],
+    [403, 'forbidden'],
+    [500, 'server'],
+  ] as const)('classifica HTTP %s sem depender do corpo JSON', async (status, type) => {
+    await expect(
+      executeGraphql(protectedDocument, undefined, {
+        authenticated: false,
+        fetch: async () => jsonResponse({}, status),
+      }),
+    ).rejects.toMatchObject({ type })
   })
 })

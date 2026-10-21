@@ -1,25 +1,22 @@
-import type { SessionUser } from '@/features/auth/api/schemas'
-
-export type SignOutReason = 'signedOut' | 'expired' | null
-
+export type SignOutReason = 'signedOut' | 'localOnly' | 'expired' | null
 export type SessionState =
   | { status: 'restoring' }
   | { status: 'signedOut'; reason: SignOutReason }
-  | { status: 'signedIn'; user: SessionUser }
-
+  | { status: 'signedIn' }
+  | { status: 'recovery'; message: string }
 export type SessionAction =
-  | { type: 'restored'; user: SessionUser }
-  | { type: 'signedIn'; user: SessionUser }
+  | { type: 'restoring' }
+  | { type: 'signedIn' }
   | { type: 'signedOut'; reason?: SignOutReason }
   | { type: 'expired' }
-
+  | { type: 'recovery'; message: string }
 export const initialSessionState: SessionState = { status: 'restoring' }
-
-export function sessionReducer(state: SessionState, action: SessionAction): SessionState {
+export function sessionReducer(_state: SessionState, action: SessionAction): SessionState {
   switch (action.type) {
-    case 'restored':
     case 'signedIn':
-      return { status: 'signedIn', user: action.user }
+      return { status: 'signedIn' }
+    case 'restoring':
+      return { status: 'restoring' }
     case 'signedOut':
       return {
         status: 'signedOut',
@@ -27,7 +24,7 @@ export function sessionReducer(state: SessionState, action: SessionAction): Sess
       }
     case 'expired':
       return { status: 'signedOut', reason: 'expired' }
-    default:
-      return state
+    case 'recovery':
+      return { status: 'recovery', message: action.message }
   }
 }

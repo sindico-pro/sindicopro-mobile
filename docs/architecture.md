@@ -1,42 +1,19 @@
-# Arquitetura do Síndico Pro Mobile
+# Arquitetura do incremento implementado
 
-Primeiro incremento: login real, sessão segura, painel inicial e logout. O app é um cliente do GraphQL já existente em `sindico-pro-server`. Não altera o backend nem o web.
+Atualizado em 21/10/2026. A base da `cursor-login` foi incorporada à `codex-login` e revisada. As decisões e alterações de backend foram autorizadas nesta conversa; o plano original em `docs/arquitetura` é histórico, não um relatório de testes concluídos.
 
-## Estrutura
+- **Organização:** rotas finas em `src/app`; autenticação/dashboard em `src/features`; transporte/configuração/cache em `src/lib`; UI/tema em componentes compartilhados. Testes ficam fora de `src/app`.
+- **Estado remoto:** TanStack Query v5; identidade tem uma fonte única no cache. O Context da sessão expõe status, ações e leitura dessa identidade, sem manter outra cópia de perfil. Não há cache remoto persistente ou fila offline.
+- **Contratos:** GraphQL Code Generator client preset com documentos string tipados, scalars estritos e verificação de drift. Schema versionado com procedência. O runtime não depende de parser GraphQL.
+- **Sessão:** operações mobile aditivas no Nest. SecureStore guarda refresh/metadados de ambiente em um único item; access token só em memória. Preview web usa memória e não representa persistência nativa.
+- **Restauração:** sempre confirmar refresh e identidade no servidor antes de montar a área autenticada. Falhas temporárias exibem recuperação; não se permite dashboard offline a partir de perfil salvo não validado.
+- **Concorrência:** uma renovação por vez, geração da sessão verificada em respostas tardias e escritas de armazenamento serializadas. Logout bloqueia acesso, cancela consultas e limpa o cache, inclusive quando a rede falha. Erro de exclusão impede falsa confirmação de limpeza.
+- **Transporte:** bearer atual em memória; HTTP, GraphQL e erros de formato são distintos. Dados parciais de autenticação não são aceitos. Renovação não repete mutations; erros 403 de feature não são tratados como logout global. Mensagens internas do backend não são exibidas.
+- **Ciclo de vida:** Query online/focus managers ligados ao estado inicial e eventos de rede/AppState, com cleanup. Tokens próximos da expiração são renovados, inclusive ao voltar ao app.
+- **Navegação:** Expo Router e Stack.Protected; falha de restauração mostra recuperação em vez de prender indefinidamente no splash. Deep link sem sessão confirmado vai ao login.
+- **Experiência:** marca/Maven Pro, temas claro/escuro, safe areas, teclado e inputs acessíveis. Cor de ação ajustada para contraste. Login usa RHF/Zod; senha não muda na validação e é limpa após sucesso.
+- **Escopo:** dashboard somente de identidade; foram retiradas consultas de condomínios e allowlist de perfis não autorizada por produto. Autenticação de conta ativa não concede permissões operacionais.
 
-```text
-graphql/schema.graphql          snapshot do schema commitado na main do server
-codegen.ts
-src/app/                        rotas do Expo Router
-  (auth)/sign-in.tsx
-  (app)/index.tsx               painel
-src/features/<domínio>/         api, sessão, hooks, componentes e testes
-src/lib/                        env, cliente GraphQL, QueryClient
-src/components/ui/              Button, TextField, Screen, StateView
-src/constants/theme.ts          cores da marca e Maven Pro
-```
+O backend novo não altera `PersonAccount.refreshToken` nem as operações legadas. Contas mobile têm sessão própria com expiração absoluta de 30 dias, access de até 15 minutos, refresh com hash e rotação por compare-and-swap. Replay revoga só a sessão comprometida. O bearer mobile valida a sessão ativa, bloqueio/exclusão da conta e validade do token. Essas regras não reescrevem retroativamente o comportamento dos tokens legados.
 
-Um módulo novo (ocorrências, tarefas, moradores) entra como `src/features/<módulo>` e rotas em `src/app/(app)/<módulo>`. Não criar camadas extras antes de existir uma segunda implementação real.
-
-## Decisões
-
-1. **TanStack Query + `fetch`.** O cache é por query key, com `personId` quando os dados são do usuário. `onlineManager` escuta `expo-network` e `focusManager` escuta `AppState`. Queries de rede ou timeout tentam de novo até duas vezes. Mutations não. O Apollo foi descartado: o web não usa cache normalizado, e o backend pagina por página fixa, não por cursor.
-2. **GraphQL Codegen `client-preset` com `documentMode: string`.** As operações em `src/features/*/api/operations.ts` são a fonte do contrato. `npm run schema:sync` copia `main:src/schema.gql` do server, sem usar o working tree local. `npm run codegen` gera `src/lib/graphql/__generated__`. O runtime não depende do pacote `graphql`.
-3. **Estado.** Dados remotos ficam só no TanStack Query. A sessão fica no `SessionProvider` (reducer `restoring | signedOut | signedIn`). Tokens ficam em memória e no `expo-secure-store` (`WHEN_UNLOCKED_THIS_DEVICE_ONLY`). Não há fallback para `localStorage`: o alvo é iOS e Android. Não há store global.
-4. **Sessão.** Login usa `createSession` sem header. A resposta passa por Zod e pela política de perfil. Perfis permitidos: `condominium-manager`, `external-condominium-manager`, `sub-condominium-manager` e `isEmployee`. Os tokens só são gravados depois dessa checagem. No boot, o splash espera a fonte e a leitura local. Access token vencido tenta `refreshTokenClientSide` uma vez. Falha de autenticação limpa a sessão. Falha de rede mantém a sessão e mostra o aviso offline. `personAccountByPersonId` confirma a conta em segundo plano; status `INACTIVE` encerra a sessão. Logout limpa o aparelho e o cache antes de chamar `signOut` em best-effort. O web não usa esse refresh, então o logout mobile não derruba a sessão web.
-5. **Rotas.** `Stack.Protected` libera `(app)` com sessão e `(auth)` sem sessão. Deep link para o painel sem sessão cai no login.
-6. **Formulários.** `react-hook-form` e Zod 3. A versão 6 de `@hookform/resolvers` conflita com o `effect` já instalado pelo Expo, então o resolver fica na 5.
-7. **Interface.** Sem biblioteca de componentes. Cores da marca: `#20AD96`, `#3F3A64`, `#FFCB3F`. Fonte Maven Pro. O logo do web fica sobre fundo claro porque o SVG é escuro.
-
-## Scripts
-
-- `npm run schema:sync`
-- `npm run codegen`
-- `npm run typecheck`
-- `npm run lint`
-- `npm run test`
-- `npx expo-doctor`
-
-Variável pública: `EXPO_PUBLIC_GRAPHQL_URL` (ver `.env.example`). Em aparelho físico, `localhost` não aponta para o computador.
-
-Limitações do backend que este cliente não contorna: [backend-limitations.md](backend-limitations.md).
+Limitações de implantação e aceite: [backend-limitations.md](backend-limitations.md) e [validacao-login.md](validacao-login.md).

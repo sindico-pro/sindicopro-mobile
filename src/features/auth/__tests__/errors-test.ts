@@ -1,33 +1,19 @@
-import { AccessDeniedError, messageForSignInError } from '@/features/auth/errors'
+import { messageForSignInError } from '@/features/auth/errors'
 import { AppError } from '@/lib/graphql/errors'
 
-describe('messageForSignInError', () => {
-  it('traduz credenciais inválidas e conta inativa', () => {
-    expect(messageForSignInError(new AppError('unauthenticated', 'Email or Password Incorrect!'))).toBe(
-      'E-mail ou senha incorretos',
-    )
-    expect(
-      messageForSignInError(
-        new AppError('unauthenticated', 'This account is inactive, contact the administrator'),
-      ),
-    ).toBe('Esta conta está inativa. Fale com o administrador.')
-  })
-
-  it('não trata falha de createSession como sessão renovável na mensagem', () => {
-    expect(messageForSignInError(new AppError('unauthenticated', 'Unauthorized'))).toBe(
-      'E-mail ou senha incorretos',
+describe('mensagens de login', () => {
+  it('não enumera conta inativa, inexistente ou senha incorreta', () => {
+    expect(messageForSignInError(new AppError('unauthenticated', 'interno'))).toBe(
+      'E-mail ou senha incorretos, ou conta indisponível.',
     )
   })
-
-  it('explica rede, payload inválido e perfil bloqueado', () => {
-    expect(messageForSignInError(new AppError('network', 'Sem conexão. Verifique sua internet e tente novamente.'))).toBe(
-      'Sem conexão. Verifique sua internet e tente novamente.',
+  it('não expõe erros internos do servidor', () => {
+    expect(messageForSignInError(new AppError('server', 'SQL stack/password'))).toBe(
+      'Não foi possível entrar. Tente novamente.',
     )
-    expect(messageForSignInError(new AppError('invalid_response', 'qualquer'))).toBe(
-      'Resposta inesperada do servidor. Tente novamente.',
-    )
-    expect(messageForSignInError(new AccessDeniedError())).toBe(
-      'Este app é destinado a síndicos e suas equipes',
-    )
+  })
+  it('explica rede, armazenamento e configuração', () => {
+    for (const type of ['network', 'timeout', 'storage', 'configuration'] as const)
+      expect(messageForSignInError(new AppError(type, 'ação necessária'))).toBe('ação necessária')
   })
 })

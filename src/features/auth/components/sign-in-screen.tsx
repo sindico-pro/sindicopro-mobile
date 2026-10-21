@@ -18,10 +18,9 @@ export function SignInScreen() {
     <Screen>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        style={styles.flex}>
-        <ScrollView
-          contentContainerStyle={styles.content}
-          keyboardShouldPersistTaps="handled">
+        style={styles.flex}
+      >
+        <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
           <View style={styles.column}>
             <View style={styles.logoPlate}>
               <Image
@@ -37,6 +36,11 @@ export function SignInScreen() {
             <ThemedText themeColor="textSecondary">
               Acesse o painel do síndico no celular.
             </ThemedText>
+            {signOutReason === 'localOnly' ? (
+              <ThemedText accessibilityLiveRegion="polite" themeColor="textSecondary">
+                Você saiu deste aparelho. Não foi possível confirmar a saída no servidor.
+              </ThemedText>
+            ) : null}
             {expired ? (
               <ThemedText accessibilityLiveRegion="polite" themeColor="secondary">
                 Sua sessão expirou. Entre novamente.
@@ -48,8 +52,10 @@ export function SignInScreen() {
                 setError(null)
                 try {
                   await signIn(values.email, values.password)
+                  return true
                 } catch (caught) {
                   setError(messageForSignInError(caught))
+                  return false
                 }
               }}
             />

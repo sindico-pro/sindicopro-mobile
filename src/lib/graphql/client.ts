@@ -1,38 +1,18 @@
-import { getAuthBridge, type RefreshResult } from '@/lib/graphql/auth-bridge'
-import { AppError, readGraphqlData } from '@/lib/graphql/errors'
+import { getAuthBridge } from './auth-bridge'
+import { AppError, readGraphqlData } from './errors'
 import { getGraphqlUrl } from '@/lib/env'
-
-const DEFAULT_TIMEOUT_MS = 15_000
 
 export type GraphqlDocument<TData, TVariables> = {
   toString(): string
   __apiType?: (variables: TVariables) => TData
 }
-
 export type GraphqlFetch = (input: string, init?: RequestInit) => Promise<Response>
-
 export type ExecuteOptions = {
   signal?: AbortSignal
   authenticated?: boolean
+  accessToken?: string
   timeoutMs?: number
   fetch?: GraphqlFetch
-}
-
-let refreshInFlight: Promise<RefreshResult> | null = null
-
-export function resetGraphqlClientForTests() {
-  refreshInFlight = null
-}
-
-function refreshSessionSingleFlight(): Promise<RefreshResult> {
-  if (!refreshInFlight) {
-    const current = getAuthBridge()
-    const run = current ? current.refreshSession() : Promise.resolve<RefreshResult>('unauthenticated')
-    refreshInFlight = run.finally(() => {
-      refreshInFlight = null
-    })
-  }
-  return refreshInFlight
 }
 
 export async function executeGraphql<TData, TVariables = Record<string, never>>(
@@ -40,27 +20,33 @@ export async function executeGraphql<TData, TVariables = Record<string, never>>(
   variables?: TVariables,
   options: ExecuteOptions = {},
 ): Promise<TData> {
+  const bridge = getAuthBridge()
+  const version = bridge?.getSessionVersion()
   const authenticated = options.authenticated ?? true
-
+  const isCurrent = () => getAuthBridge() === bridge && bridge?.getSessionVersion() === version
   try {
-    return await requestGraphql(document, variables, options)
+    const data = await requestGraphql(document, variables, options)
+    if (authenticated && !isCurrent()) throw new AppError('cancelled', 'Solicitação cancelada.')
+    return data
   } catch (error) {
-    if (!authenticated || !(error instanceof AppError) || error.type !== 'unauthenticated') {
+    if (!authenticated || !(error instanceof AppError) || error.type !== 'unauthenticated')
       throw error
-    }
-
-    const refreshed = await refreshSessionSingleFlight()
-    if (refreshed === 'refreshed') {
-      return await requestGraphql(document, variables, options)
-    }
+    if (!bridge || !isCurrent() || options.signal?.aborted)
+      throw new AppError('cancelled', 'Solicitação cancelada.')
+    const refreshed = await bridge.refreshSession()
+    if (!isCurrent() || options.signal?.aborted)
+      throw new AppError('cancelled', 'Solicitação cancelada.')
     if (refreshed === 'unauthenticated') {
-      getAuthBridge()?.onSessionInvalid()
+      bridge.onSessionInvalid()
       throw error
     }
-
-    throw new AppError('network', 'Sem conexão. Verifique sua internet e tente novamente.', {
-      cause: error,
-    })
+    if (refreshed === 'unavailable')
+      throw new AppError('network', 'Não foi possível confirmar sua sessão. Tente novamente.')
+    // Mutations may already have effects: never replay them implicitly.
+    if (!/^\s*query\b/.test(document.toString())) throw error
+    const data = await requestGraphql(document, variables, options)
+    if (!isCurrent()) throw new AppError('cancelled', 'Solicitação cancelada.')
+    return data
   }
 }
 
@@ -69,67 +55,54 @@ async function requestGraphql<TData, TVariables>(
   variables: TVariables | undefined,
   options: ExecuteOptions,
 ): Promise<TData> {
-  if (options.signal?.aborted) {
-    throw options.signal.reason ?? new DOMException('The operation was aborted.', 'AbortError')
-  }
-
+  const url = getGraphqlUrl()
+  if (options.signal?.aborted) throw new AppError('cancelled', 'Solicitação cancelada.')
   const controller = new AbortController()
-  const timeout = setTimeout(() => controller.abort(), options.timeoutMs ?? DEFAULT_TIMEOUT_MS)
-  const abortFromCaller = () => controller.abort()
-  options.signal?.addEventListener('abort', abortFromCaller)
-
+  const timeout = setTimeout(() => controller.abort(), options.timeoutMs ?? 15_000)
+  const onAbort = () => controller.abort()
+  options.signal?.addEventListener('abort', onAbort)
   try {
     const headers: Record<string, string> = {
       accept: 'application/json',
       'content-type': 'application/json',
     }
-    const authenticated = options.authenticated ?? true
-    if (authenticated) {
-      const token = getAuthBridge()?.getAccessToken()
-      if (token) headers.authorization = `Bearer ${token}`
-    }
-
-    const doFetch: GraphqlFetch = options.fetch ?? fetch
-    let response: Response
-    try {
-      response = await doFetch(getGraphqlUrl(), {
-        method: 'POST',
-        headers,
-        body: JSON.stringify({ query: document.toString(), variables }),
-        signal: controller.signal,
-      })
-    } catch (error) {
-      if (options.signal?.aborted) throw error
-      if (controller.signal.aborted) {
-        throw new AppError('timeout', 'A conexão demorou demais. Tente novamente.')
-      }
-      throw new AppError('network', 'Sem conexão. Verifique sua internet e tente novamente.', {
-        cause: error,
-      })
-    }
-
-    let json: unknown
-    try {
-      json = await response.json()
-    } catch (error) {
-      if (!response.ok) {
-        throw new AppError('server', 'Não foi possível falar com o servidor.', {
-          cause: error,
-          statusCode: response.status,
-        })
-      }
-      throw new AppError('invalid_response', 'Resposta inválida do servidor', { cause: error })
-    }
-
-    if (!response.ok && (!json || typeof json !== 'object' || !('errors' in json))) {
+    const token =
+      options.accessToken ??
+      (options.authenticated ?? true ? getAuthBridge()?.getAccessToken() : null)
+    if ((options.authenticated ?? true) && !token)
+      throw new AppError('unauthenticated', 'Entre novamente.')
+    if (token) headers.authorization = `Bearer ${token}`
+    const response = await (options.fetch ?? fetch)(url, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ query: document.toString(), variables }),
+      signal: controller.signal,
+    })
+    if (response.status === 401) throw new AppError('unauthenticated', 'Entre novamente.')
+    if (response.status === 403)
+      throw new AppError('forbidden', 'Você não tem acesso a este recurso.')
+    if (!response.ok)
       throw new AppError('server', 'Não foi possível falar com o servidor.', {
         statusCode: response.status,
       })
+    let body: unknown
+    try {
+      body = await response.json()
+    } catch (error) {
+      if (controller.signal.aborted) throw error
+      throw new AppError('invalid_response', 'Resposta inesperada do servidor.')
     }
-
-    return readGraphqlData<TData>(json)
+    return readGraphqlData<TData>(body)
+  } catch (error) {
+    if (options.signal?.aborted) throw new AppError('cancelled', 'Solicitação cancelada.')
+    if (controller.signal.aborted)
+      throw new AppError('timeout', 'A conexão demorou demais. Tente novamente.')
+    if (error instanceof AppError) throw error
+    throw new AppError('network', 'Sem conexão. Verifique sua internet e tente novamente.', {
+      cause: error,
+    })
   } finally {
     clearTimeout(timeout)
-    options.signal?.removeEventListener('abort', abortFromCaller)
+    options.signal?.removeEventListener('abort', onAbort)
   }
 }

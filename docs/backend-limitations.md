@@ -1,29 +1,28 @@
-# Limitações do backend que afetam o app
+# Backend necessário e limites de aceite
 
-Fatos conferidos em `sindico-pro-server` (`src/auth/auth.service.ts`, guards e `src/schema.gql`). Nenhuma destas correções foi feita. O app convive com elas. Mudança de contrato de produção precisa de aprovação.
+O mobile depende da branch **codex-mobile-auth** do `sindico-pro-server`. Não usa mais os endpoints legados que mantêm um único refresh por conta.
 
-## Sessão
+## Pré-requisito de teste
 
-- Access token e refresh token duram 30 dias. O access token não é revogado no logout nem quando a conta fica inativa: `AccessTokenStrategy` só valida a assinatura e se a conta existe.
-- `PersonAccount.refreshToken` é um único valor, em texto puro. Cada login, no app ou no web, substitui o refresh anterior. O último login ganha o slot.
-- `refreshTokenClientSide` verifica o refresh com `JWT_REFRESH_SECRET`, mas `renewAccessToken` assina o refresh novo com `JWT_SECRET`. A segunda renovação falha, a menos que os dois segredos sejam iguais em produção. Isso não foi confirmado no ambiente.
-- Se o refresh não bate com o slot, o backend chama `signOut` e zera o refresh da conta. O access token do web continua válido, porque o web não usa o refresh.
-- `signOut(personId)` é público. O app só o chama depois de limpar a sessão local.
+A migration `20261021150000_mobile_sessions` cria uma tabela aditiva com FK para a conta; o campo legado de refresh é preservado. O SQL foi criado e o schema Prisma validado, mas nenhuma migration, seed ou deploy foi executado. É necessário preparar um ambiente de teste com essa migration antes de fazer login real pelo app.
 
-O web (`sindico-pro-web`) grava o refresh e nunca o envia. O logout web só apaga cookies. Por isso o app não invalida a sessão web.
+## Contrato novo
 
-## Autorização e dados
+- `createMobileSession(data: CreateAuthInput!)`: `accessToken`, `refreshToken` e pessoa básica.
+- `refreshMobileSession(data: RefreshTokenClientSideInput!)`: tokens novos da mesma sessão.
+- `mobileMe`: identidade derivada do bearer, com validação da sessão/conta ativa.
+- `revokeMobileSession(refreshToken: String!)`: revoga somente a sessão identificada pelo refresh assinado.
 
-- Não há guard global. Várias queries usadas pelo produto, inclusive `getCondosByPerson`, aceitam um `person_id` sem exigir o token. O app envia o id da sessão e o bearer quando a operação é autenticada, mas o risco de IDOR continua no servidor.
-- `PermissionGuard` libera a request quando não há header. Permissão vazia também libera. O síndico dono (`created_by_person_id` nulo) passa em qualquer feature.
-- O login não tem limite de tentativas. O app não repete `createSession` sozinho.
-- Erros GraphQL não têm código de domínio estável. `UnauthorizedException` vira `UNAUTHENTICATED`. O texto mistura inglês e português, e o app traduz só as mensagens conhecidas do login.
-- Ocorrências não paginam. Parte do kanban também devolve listas inteiras. `getKanbanDashboard` calcula métricas invertidas e `KanbanCard.occurrence` está com o tipo errado no schema. Não usar essas queries até corrigir.
-- Upload de ocorrência e tarefa é `POST /upload/:userId`, sem autenticação. Não há URL pré-assinada nem token de push mobile. A chave privada VAPID de Web Push está no código do server.
+O access token mobile vale até 15 minutos; a sessão tem duração absoluta de 30 dias. Refresh é rotacionado com atualização condicional atômica; só seu hash é armazenado. Refresh expirado/revogado ou replay exige login. Reutilização assinada de refresh antigo pode revogar sua própria família, sem alterar outra sessão mobile ou a credencial web.
 
-## O que o app faz enquanto isso
+Não há retry automático de refresh após resultado de rede indeterminado. Se o servidor rotacionou, mas a resposta se perdeu, uma nova tentativa poderá exigir reautenticação. A UI mantém a credencial e oferece recuperação; não promete idempotência que o servidor não implementa.
 
-- Guarda os tokens só no SecureStore e na memória.
-- Renova o access token uma vez, em uma única chamada compartilhada, e desiste se a renovação falhar por autenticação.
-- Não promete sessão infinita nem vários aparelhos com refresh simultâneo.
-- Seleciona só os campos necessários de condomínio, sem os relacionamentos que geram N+1.
+Logout offline remove a credencial local; revogação remota não é confirmada e essa limitação é informada no login. Falha de SecureStore também é explícita. Instalações de teste da implementação anterior precisam entrar novamente; seus tokens e objetos de perfil não são reutilizados.
+
+## Compatibilidade e limites
+
+As operações e os tokens legados do site permanecem disponíveis. A estratégia bearer distingue tokens mobile antes de verificar sua sessão; não consulta a tabela nova para um bearer legado normal. Os testes de unidade cobrem a coexistência e os caminhos legados, mas não substituem regressão do site com banco real.
+
+Não foram alteradas as regras de acesso por condomínio dos módulos existentes, o pipeline de arquivos, o Web Push nem as limitações de paginação. Antes de portar esses módulos, revisar autorização por recurso, volume e contratos. Aplicar limitação de tentativas de autenticação na infraestrutura do ambiente e verificar sua efetividade antes de exposição pública; esta entrega não acrescentou um limitador distribuído.
+
+O app não inclui chave JWT/S3/banco. `EXPO_PUBLIC_GRAPHQL_URL` é público e deve apontar ao ambiente de teste. Nunca usar banco/conta de produção para testes destrutivos ou de replay.

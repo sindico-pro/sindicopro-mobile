@@ -1,6 +1,6 @@
 # Síndico Pro Mobile — planejamento arquitetural
 
-Revisão: 20/10/2026. Status: proposta para aprovação, sem implementação. Esta revisão substitui integralmente o plano anterior.
+Planejamento de 20/10/2026, preservado como histórico. Em 21/10/2026 o usuário autorizou a implementação na codex-login e a alteração aditiva de autenticação no backend em branch separada. Situação atual: [arquitetura implementada](architecture.md) e [validação](validacao-login.md). O texto abaixo registra as decisões anteriores à execução.
 
 ## Direção proposta
 

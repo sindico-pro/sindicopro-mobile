@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, type ComponentPropsWithRef } from 'react'
 import { Pressable, StyleSheet, TextInput, View, type TextInputProps } from 'react-native'
 
 import { ThemedText } from '@/components/themed-text'
@@ -7,6 +7,7 @@ import { useTheme } from '@/hooks/use-theme'
 
 type TextFieldProps = TextInputProps & {
   label: string
+  ref?: ComponentPropsWithRef<typeof TextInput>['ref']
   error?: string
   secureToggle?: boolean
 }
@@ -26,7 +27,8 @@ export function TextField({ label, error, secureToggle = false, style, ...rest }
             backgroundColor: theme.backgroundElement,
             borderColor: error ? theme.danger : theme.backgroundSelected,
           },
-        ]}>
+        ]}
+      >
         <TextInput
           accessibilityLabel={label}
           placeholderTextColor={theme.textSecondary}
@@ -40,7 +42,8 @@ export function TextField({ label, error, secureToggle = false, style, ...rest }
             accessibilityLabel={visible ? 'Ocultar senha' : 'Mostrar senha'}
             onPress={() => setVisible((current) => !current)}
             hitSlop={8}
-            style={styles.toggle}>
+            style={styles.toggle}
+          >
             <ThemedText type="small" themeColor="primary">
               {visible ? 'Ocultar' : 'Mostrar'}
             </ThemedText>
@@ -75,7 +78,7 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.two,
   },
   toggle: {
-    minHeight: 44,
+    minHeight: 48,
     justifyContent: 'center',
     paddingRight: Spacing.three,
   },

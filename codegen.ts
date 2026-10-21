@@ -9,6 +9,7 @@ const config: CodegenConfig = {
       preset: 'client',
       config: {
         documentMode: 'string',
+        strictScalars: true,
         useTypeImports: true,
         scalars: {
           DateTime: 'string',
