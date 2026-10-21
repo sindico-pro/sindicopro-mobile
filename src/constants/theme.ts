@@ -3,53 +3,47 @@
  * There are many other ways to style your app. For example, [Nativewind](https://www.nativewind.dev/), [Tamagui](https://tamagui.dev/), [unistyles](https://unistyl.es/), etc.
  */
 
-import '@/global.css';
-
 import { Platform } from 'react-native';
 
 export const Colors = {
   light: {
-    text: '#000000',
+    text: '#1C1B22',
     background: '#ffffff',
-    backgroundElement: '#F0F0F3',
-    backgroundSelected: '#E0E1E6',
-    textSecondary: '#60646C',
+    backgroundElement: '#F3F4F6',
+    backgroundSelected: '#E4E6EA',
+    textSecondary: '#5C6070',
+    primary: '#20AD96',
+    onPrimary: '#ffffff',
+    secondary: '#3F3A64',
+    accent: '#FFCB3F',
+    danger: '#C53434',
   },
   dark: {
     text: '#ffffff',
-    background: '#000000',
-    backgroundElement: '#212225',
-    backgroundSelected: '#2E3135',
+    background: '#121318',
+    backgroundElement: '#21232A',
+    backgroundSelected: '#2E3138',
     textSecondary: '#B0B4BA',
+    primary: '#20AD96',
+    onPrimary: '#ffffff',
+    secondary: '#C7C3E0',
+    accent: '#FFCB3F',
+    danger: '#FF8A80',
   },
 } as const;
 
 export type ThemeColor = keyof typeof Colors.light & keyof typeof Colors.dark;
 
-export const Fonts = Platform.select({
-  ios: {
-    /** iOS `UIFontDescriptorSystemDesignDefault` */
-    sans: 'system-ui',
-    /** iOS `UIFontDescriptorSystemDesignSerif` */
-    serif: 'ui-serif',
-    /** iOS `UIFontDescriptorSystemDesignRounded` */
-    rounded: 'ui-rounded',
-    /** iOS `UIFontDescriptorSystemDesignMonospaced` */
-    mono: 'ui-monospace',
-  },
-  default: {
-    sans: 'normal',
-    serif: 'serif',
-    rounded: 'normal',
-    mono: 'monospace',
-  },
-  web: {
-    sans: 'var(--font-display)',
-    serif: 'var(--font-serif)',
-    rounded: 'var(--font-rounded)',
-    mono: 'var(--font-mono)',
-  },
-});
+export const Fonts = {
+  sans: 'MavenPro_400Regular',
+  medium: 'MavenPro_500Medium',
+  semibold: 'MavenPro_600SemiBold',
+  bold: 'MavenPro_700Bold',
+  mono: Platform.select({
+    ios: 'ui-monospace',
+    default: 'monospace',
+  }),
+} as const;
 
 export const Spacing = {
   half: 2,
