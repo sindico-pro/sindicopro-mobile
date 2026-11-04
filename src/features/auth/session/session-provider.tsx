@@ -56,7 +56,14 @@ export function SessionProvider({
     [],
   )
   const user = useSyncExternalStore(
-    useCallback((notify) => client.getQueryCache().subscribe(notify), [client]),
+    useCallback(
+      (notify) =>
+        client.getQueryCache().subscribe((event) => {
+          // Other queries are added while a screen renders. Notifying here would update this provider mid-render.
+          if (event.query.queryKey[0] === IDENTITY_KEY[0]) notify()
+        }),
+      [client],
+    ),
     useCallback(() => client.getQueryData<SessionUser>(IDENTITY_KEY) ?? null, [client]),
     () => null,
   )

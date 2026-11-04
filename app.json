@@ -8,13 +8,14 @@
     "scheme": "sindicopromobile",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "icon": "./assets/expo.icon"
+      "bundleIdentifier": "com.sindicopro",
+      "supportsTablet": false
     },
     "android": {
+      "package": "com.sindicopro",
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
+        "backgroundColor": "#FFFFFF",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
-        "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false
@@ -29,9 +30,19 @@
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#20AD96",
+          "backgroundColor": "#FFFFFF",
           "image": "./assets/images/splash-icon.png",
-          "imageWidth": 76
+          "imageWidth": 240,
+          "android": {
+            "imageWidth": 176
+          }
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "cameraPermission": "O SíndicoPro usa a câmera para fotos das tarefas.",
+          "photosPermission": "O SíndicoPro acessa suas fotos para anexar às tarefas."
         }
       ]
     ],

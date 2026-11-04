@@ -53,6 +53,10 @@ export function appErrorFromGraphqlErrors(errors: GraphqlErrorBody[]): AppError 
     return new AppError('bad_request', 'Confira os dados informados.')
   return new AppError('server', 'Não foi possível concluir a solicitação. Tente novamente.')
 }
+export function errorMessage(error: unknown) {
+  return error instanceof AppError ? error.message : 'Não foi possível carregar. Tente novamente.'
+}
+
 export function readGraphqlData<TData>(body: unknown): TData {
   const parsed = z
     .object({

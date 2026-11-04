@@ -73,6 +73,10 @@ describe('rotas protegidas', () => {
     await renderRouter('./src/app', { initialUrl: '/' })
 
     expect(await screen.findByText('Olá, Ana')).toBeTruthy()
+    expect(screen.getByText('Início')).toBeTruthy()
+    expect(screen.getByText('Ocorrências')).toBeTruthy()
+    expect(screen.getByText('Tarefas')).toBeTruthy()
+    expect(screen.getByText('Menu')).toBeTruthy()
     expect(screen.queryByLabelText('E-mail')).toBeNull()
   })
 

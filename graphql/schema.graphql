@@ -347,6 +347,148 @@ type RefreshTokensOutput {
   refreshToken: String
 }
 
+type MobileSessionPerson {
+  id: ID!
+  name: String!
+  email: String!
+  status: String!
+}
+
+type MobileTokens {
+  accessToken: String!
+  refreshToken: String!
+}
+
+type MobileAuth {
+  accessToken: String!
+  refreshToken: String!
+  person: MobileSessionPerson!
+}
+
+type MobileCondo {
+  id: ID!
+  name: String!
+  features: [String!]!
+}
+
+type MobileOccurrenceSummary {
+  open: Int!
+  withoutResponse: Int!
+  pendingManager: Int!
+  closed: Int!
+}
+
+type MobileTaskSummary {
+  overdue: Int!
+  dueToday: Int!
+  dueTomorrow: Int!
+}
+
+type MobileRealizationItem {
+  id: ID!
+  title: String!
+  heldIn: DateTime
+  coverImageUrl: String
+}
+
+type MobileHome {
+  occurrences: MobileOccurrenceSummary
+  tasks: MobileTaskSummary
+  recentRealizations: [MobileRealizationItem!]
+}
+
+type MobileOccurrenceItem {
+  id: ID!
+  title: String!
+  status: String!
+  occurredAt: DateTime
+  createdAt: DateTime
+}
+
+type MobileTaskItem {
+  id: ID!
+  title: String!
+  priority: String!
+  dueDate: DateTime
+  responsibleName: String
+  columnName: String
+}
+
+type MobileTaskCounts {
+  todo: Int!
+  doing: Int!
+  done: Int!
+  overdue: Int!
+  canCreate: Boolean!
+  canExecute: Boolean!
+  mineLocked: Boolean!
+}
+
+type MobileTaskListItem {
+  id: ID!
+  title: String!
+  priority: String!
+  dueDate: DateTime
+  isOverdue: Boolean!
+  responsibleName: String
+  status: MobileTaskStatus!
+  photoCount: Int!
+  commentCount: Int!
+}
+
+enum MobileTaskStatus {
+  TODO
+  IN_PROGRESS
+  DONE
+}
+
+type MobileTaskComment {
+  id: ID!
+  content: String!
+  authorName: String!
+  createdAt: DateTime!
+}
+
+type MobileTaskDetail {
+  id: ID!
+  title: String!
+  description: String!
+  priority: String!
+  dueDate: DateTime
+  isOverdue: Boolean!
+  responsibleId: String
+  responsibleName: String
+  status: MobileTaskStatus!
+  beforePhotoUrls: [String!]!
+  afterPhotoUrls: [String!]!
+  comments: [MobileTaskComment!]!
+  startedByName: String
+  startedAt: DateTime
+  completedByName: String
+  completedAt: DateTime
+  occurrenceId: String
+  occurrenceTitle: String
+  canExecute: Boolean!
+  canEdit: Boolean!
+  canCreate: Boolean!
+}
+
+type MobileTaskPersonOption {
+  id: ID!
+  name: String!
+}
+
+type MobileTaskCategoryOption {
+  id: ID!
+  name: String!
+}
+
+type MobileTaskFormOptions {
+  responsibles: [MobileTaskPersonOption!]!
+  categories: [MobileTaskCategoryOption!]!
+  canCreate: Boolean!
+}
+
 type AnonymousReportResponseViewModel {
   id: ID!
   report_id: String!
@@ -1708,6 +1850,14 @@ type Query {
   getPlaceBillingsByCondo(condoId: String!): [PlaceBillingViewModel!]!
   getPlaceBillingsByPlace(placeId: String!): [PlaceBillingViewModel!]!
   getPlaceBillingsByPlaceChecklist(placeChecklistId: String!): [PlaceBillingViewModel!]!
+  mobileCondos: [MobileCondo!]!
+  mobileHome(condoId: String!): MobileHome!
+  mobileOccurrences(condoId: String!, filter: MobileOccurrenceFilter!, limit: Int): [MobileOccurrenceItem!]!
+  mobileTasks(condoId: String!, due: MobileTaskDue!, limit: Int): [MobileTaskItem!]!
+  mobileTaskCounts(condoId: String!): MobileTaskCounts!
+  mobileTaskList(condoId: String!, status: MobileTaskStatus!, due: MobileTaskDue, mine: Boolean, limit: Int, offset: Int): [MobileTaskListItem!]!
+  mobileTask(id: String!): MobileTaskDetail!
+  mobileTaskFormOptions(condoId: String!): MobileTaskFormOptions!
   mobileMe: MobileSessionPerson!
 }
 
@@ -1755,6 +1905,19 @@ input FindManyRatingsInput {
   screen: String
 }
 
+enum MobileOccurrenceFilter {
+  OPEN
+  WITHOUT_RESPONSE
+  PENDING_MANAGER
+  CLOSED
+}
+
+enum MobileTaskDue {
+  OVERDUE
+  TODAY
+  TOMORROW
+}
+
 type Mutation {
   createBlock(data: CreateBlockInput!): BlockViewModel!
   createManyBlocks(data: CreateManyBlocksInput!): Boolean!
@@ -1799,6 +1962,7 @@ type Mutation {
   updateOccurrenceStatus(id: String!, status: String!): OccurrenceViewModel!
   updateOccurrenceStatusToClosed(id: String!): OccurrenceViewModel!
   updateOccurrence(data: UpdateOccurrenceInput!): OccurrenceViewModel!
+  deleteOccurrence(id: String!): OccurrenceViewModel!
   createOccurrenceResponse(data: CreateOccurrenceResponseInput!): OccurrenceResponseViewModel!
   analyzeOccurrenceWithAi(occurrenceId: String!, force: Boolean): OccurrenceAiAnalysisViewModel!
   applyOccurrenceAiSuggestion(analysisId: String!, templateId: String): AppliedOccurrenceAiSuggestionViewModel!
@@ -1867,6 +2031,8 @@ type Mutation {
   createKanbanCard(data: CreateKanbanCardInput!): KanbanCardViewModel!
   duplicateKanbanCard(data: DuplicateKanbanCardInput!): KanbanCardViewModel!
   updateKanbanCard(data: UpdateKanbanCardInput!): KanbanCardViewModel!
+  moveKanbanCard(data: MoveKanbanCardInput!): KanbanCardViewModel!
+  updateKanbanCardPhotos(data: UpdateKanbanCardPhotosInput!): KanbanCardViewModel!
   deleteKanbanCard(kanban_card_id: String!): Boolean!
   deleteRecurrentKanbanCard(data: DeleteRecurrentKanbanCardInput!): Boolean!
   createKanbanCardComment(data: CreateKanbanCardCommentInput!): KanbanCardCommentViewModel!
@@ -1988,6 +2154,11 @@ type Mutation {
   createPlaceBilling(data: CreatePlaceBillingInput!): PlaceBillingViewModel!
   updatePlaceBilling(data: UpdatePlaceBillingInput!): PlaceBillingViewModel!
   deletePlaceBilling(placeBillingId: String!): Boolean!
+  mobileMoveTask(id: String!, status: MobileTaskStatus!): MobileTaskDetail!
+  mobileAddTaskComment(id: String!, content: String!): MobileTaskDetail!
+  mobileAddTaskPhotos(id: String!, kind: MobileTaskPhotoKind!, urls: [String!]!): MobileTaskDetail!
+  mobileRemoveTaskPhoto(id: String!, url: String!): MobileTaskDetail!
+  mobileCreateTask(data: MobileCreateTaskInput!): MobileTaskDetail!
   createMobileSession(data: CreateAuthInput!): MobileAuth!
   refreshMobileSession(data: RefreshTokenClientSideInput!): MobileTokens!
   revokeMobileSession(refreshToken: String!): Boolean!
@@ -2280,6 +2451,14 @@ input UpdateOccurrenceInput {
   title: String
   description: String
   category: String
+  person_name: String
+  person_email: String
+  person_phone: String
+  who_are_you: String
+  occurrence_at: DateTime
+  block_id: String
+  unity_id: String
+  files_url: [String!]
 }
 
 input CreateOccurrenceResponseInput {
@@ -2718,6 +2897,18 @@ input UpdateKanbanCardInput {
   is_recurring_task: Boolean
   frequency: String
   week_day: Int
+}
+
+input MoveKanbanCardInput {
+  kanban_card_id: String!
+  kanban_column_id: String!
+  position: Int
+}
+
+input UpdateKanbanCardPhotosInput {
+  kanban_card_id: String!
+  file_urls: [String!]
+  before_file_urls: [String!]
 }
 
 input DeleteRecurrentKanbanCardInput {
@@ -3491,20 +3682,17 @@ input UpdatePlaceBillingInput {
   billingItems: [BillingItemInput!]
 }
 
-type MobileSessionPerson {
-  id: ID!
-  name: String!
-  email: String!
-  status: String!
+enum MobileTaskPhotoKind {
+  BEFORE
+  AFTER
 }
 
-type MobileTokens {
-  accessToken: String!
-  refreshToken: String!
-}
-
-type MobileAuth {
-  accessToken: String!
-  refreshToken: String!
-  person: MobileSessionPerson!
+input MobileCreateTaskInput {
+  condoId: String!
+  title: String!
+  description: String
+  priority: String!
+  dueDate: DateTime
+  responsibleId: String
+  photoUrls: [String!]
 }

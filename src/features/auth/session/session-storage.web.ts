@@ -1,5 +1,6 @@
 // Browser preview only. Native persistence is provided by SecureStore.
 import type { StoredSession } from './session-storage'
+import { clearSelectedCondo } from '@/features/condo/selected-condo'
 import { getGraphqlUrl } from '@/lib/env'
 
 let credential: StoredSession | null = null
@@ -11,4 +12,5 @@ export async function saveStoredSession(refreshToken: string) {
 }
 export async function clearStoredSession() {
   credential = null
+  await clearSelectedCondo()
 }

@@ -1,6 +1,7 @@
 import * as SecureStore from 'expo-secure-store'
 import { z } from 'zod'
 
+import { SELECTED_CONDO_KEY } from '@/features/condo/selected-condo'
 import { getGraphqlUrl } from '@/lib/env'
 import { AppError } from '@/lib/graphql/errors'
 
@@ -68,6 +69,7 @@ export async function clearStoredSession() {
       'sindicopro.accessToken',
       'sindicopro.refreshToken',
       'sindicopro.user',
+      SELECTED_CONDO_KEY,
     ]) {
       await SecureStore.deleteItemAsync(key, OPTIONS)
     }

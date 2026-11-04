@@ -82,8 +82,8 @@ function RootNavigator() {
     colors: {
       ...baseTheme.colors,
       primary: '#20AD96',
-      background: colorScheme === 'dark' ? '#121318' : '#ffffff',
-      card: colorScheme === 'dark' ? '#121318' : '#ffffff',
+      background: colorScheme === 'dark' ? '#121318' : '#F7F9FA',
+      card: colorScheme === 'dark' ? '#1C1E26' : '#FFFFFF',
       text: colorScheme === 'dark' ? '#ffffff' : '#1C1B22',
       border: colorScheme === 'dark' ? '#21232A' : '#F3F4F6',
     },

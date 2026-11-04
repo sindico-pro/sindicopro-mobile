@@ -12,8 +12,10 @@ for (const name of ['createMobileSession', 'refreshMobileSession', 'revokeMobile
   if (!schema.getMutationType()?.getFields()[name])
     throw new Error(`Schema sem a operação ${name}; nenhum arquivo foi alterado.`)
 }
-if (!schema.getQueryType()?.getFields().mobileMe)
-  throw new Error('Schema sem mobileMe; nenhum arquivo foi alterado.')
+for (const name of ['mobileMe', 'mobileCondos', 'mobileHome', 'mobileOccurrences', 'mobileTasks']) {
+  if (!schema.getQueryType()?.getFields()[name])
+    throw new Error(`Schema sem ${name}; nenhum arquivo foi alterado.`)
+}
 await writeFile('graphql/schema.graphql', text)
 const hash = createHash('sha256').update(text).digest('hex')
 await writeFile(

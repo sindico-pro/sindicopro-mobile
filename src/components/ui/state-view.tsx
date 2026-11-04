@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import { ActivityIndicator, StyleSheet, View } from 'react-native'
 
 import { Button } from '@/components/ui/button'
@@ -9,15 +10,16 @@ type StateViewProps = {
   loading?: boolean
   error?: string | null
   empty?: string | null
+  emptyIcon?: ReactNode
   onRetry?: () => void
 }
 
-export function StateView({ loading = false, error, empty, onRetry }: StateViewProps) {
+export function StateView({ loading = false, error, empty, emptyIcon, onRetry }: StateViewProps) {
   const theme = useTheme()
 
   if (loading) {
     return (
-      <View style={styles.box} accessibilityRole="progressbar">
+      <View accessibilityRole="progressbar" style={styles.box} testID="loading">
         <ActivityIndicator color={theme.primary} />
       </View>
     )
@@ -37,6 +39,7 @@ export function StateView({ loading = false, error, empty, onRetry }: StateViewP
   if (empty) {
     return (
       <View style={styles.box}>
+        {emptyIcon}
         <ThemedText style={styles.message} themeColor="textSecondary">
           {empty}
         </ThemedText>
