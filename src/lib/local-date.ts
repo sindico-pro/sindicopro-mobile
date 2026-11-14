@@ -8,18 +8,14 @@ export function localTime(date = new Date()) {
   return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`
 }
 
-export function recentDays(count: number, now = new Date()) {
-  return Array.from({ length: count }, (_, index) => {
-    const date = new Date(now)
-    date.setDate(date.getDate() - index)
-    const label =
-      index === 0
-        ? 'Hoje'
-        : index === 1
-          ? 'Ontem'
-          : new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: '2-digit' }).format(date)
-    return { day: localDay(date), label }
-  })
+export function endOfLocalDay(date = new Date()) {
+  const end = new Date(date)
+  end.setHours(23, 59, 59, 999)
+  return end
+}
+
+export function dateFromLocal(day: string, time = '12:00') {
+  return combineLocal(day, time) ?? new Date()
 }
 
 export function combineLocal(day: string, time: string) {

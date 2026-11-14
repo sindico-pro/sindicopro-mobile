@@ -5,7 +5,8 @@ import { NewRealizationScreen } from '@/features/realizations/components/new-rea
 export default function NewRealizationRoute() {
   return (
     <>
-      <Stack.Screen options={{ presentation: 'modal', title: 'Nova realização' }} />
+      <Stack.Title>Criar Realização</Stack.Title>
+      <Stack.Screen.BackButton>Voltar</Stack.Screen.BackButton>
       <NewRealizationScreen />
     </>
   )

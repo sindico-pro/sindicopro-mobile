@@ -12,6 +12,11 @@ jest.mock('expo-router', () => ({
   useRouter: () => ({ replace: mockReplace }),
 }))
 
+jest.mock('@expo/ui/community/datetime-picker', () => ({
+  __esModule: true,
+  default: () => null,
+}))
+
 jest.mock('@/features/auth/session/session-provider', () => ({
   useSession: () => ({ user: { id: 'person-1', name: 'Ana' } }),
 }))
@@ -44,11 +49,11 @@ describe('nova ocorrência', () => {
     mockReplace.mockReset()
   })
 
-  it('abre a ocorrência com título, descrição e o momento informado', async () => {
+  it('abre a ocorrência com título, descrição e o momento do picker', async () => {
+    const before = Date.now()
     await render(<NewOccurrenceScreen />)
     fireEvent.changeText(screen.getByLabelText('Título'), 'Portão')
     fireEvent.changeText(screen.getByLabelText('Descrição'), 'Não fecha direito')
-    fireEvent.changeText(screen.getByLabelText('Horário'), '09:15')
     fireEvent.press(screen.getByRole('button', { name: 'Abrir ocorrência' }))
     await waitFor(() => expect(mockCreate).toHaveBeenCalled())
     expect(mockCreate).toHaveBeenCalledWith(
@@ -58,9 +63,9 @@ describe('nova ocorrência', () => {
         photoUris: [],
       }),
     )
-    const occurredAt = new Date(mockCreate.mock.calls[0][0].occurredAt ?? '')
-    expect(occurredAt.getHours()).toBe(9)
-    expect(occurredAt.getMinutes()).toBe(15)
+    const occurredAt = new Date(mockCreate.mock.calls[0][0].occurredAt ?? '').getTime()
+    expect(Math.abs(occurredAt - before)).toBeLessThan(90_000)
+    expect(new Date(occurredAt).getSeconds()).toBe(0)
     expect(mockReplace).toHaveBeenCalledWith({ pathname: '/occurrences/[id]', params: { id: 'occ-1' } })
   })
 })

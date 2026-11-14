@@ -2,11 +2,12 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useRouter } from 'expo-router'
 import { useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
-import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Switch, View } from 'react-native'
+import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Switch, View } from 'react-native'
 
 import { ThemedText } from '@/components/themed-text'
 import { Banner } from '@/components/ui/banner'
 import { Button } from '@/components/ui/button'
+import { DateTimeField } from '@/components/ui/date-time-field'
 import { PhotoPicker } from '@/components/ui/photo-picker'
 import { Screen } from '@/components/ui/screen'
 import { StateView } from '@/components/ui/state-view'
@@ -22,7 +23,7 @@ import { useCreateRealization } from '@/features/realizations/use-create-realiza
 import { useRealizationAccess } from '@/features/realizations/use-realization'
 import { useTheme } from '@/hooks/use-theme'
 import { errorMessage } from '@/lib/graphql/errors'
-import { combineLocal, localDay, recentDays } from '@/lib/local-date'
+import { combineLocal, dateFromLocal, endOfLocalDay, localDay } from '@/lib/local-date'
 
 export function NewRealizationScreen() {
   const theme = useTheme()
@@ -93,34 +94,18 @@ export function NewRealizationScreen() {
               />
             )}
           />
-          <ThemedText type="smallBold">Data</ThemedText>
           <Controller
             control={form.control}
             name="day"
-            render={({ field }) => (
-              <View style={styles.wrap}>
-                {recentDays(14).map((item) => {
-                  const selected = field.value === item.day
-                  return (
-                    <Pressable
-                      accessibilityRole="button"
-                      accessibilityState={{ selected }}
-                      key={item.day}
-                      onPress={() => field.onChange(item.day)}
-                      style={[
-                        styles.chip,
-                        {
-                          backgroundColor: selected ? theme.primary : theme.surface,
-                          borderColor: selected ? theme.primary : theme.border,
-                        },
-                      ]}>
-                      <ThemedText type="smallBold" style={{ color: selected ? theme.onPrimary : theme.text }}>
-                        {item.label}
-                      </ThemedText>
-                    </Pressable>
-                  )
-                })}
-              </View>
+            render={({ field, fieldState }) => (
+              <DateTimeField
+                error={fieldState.error?.message}
+                label="Data"
+                maximumDate={endOfLocalDay()}
+                mode="date"
+                onChange={(date) => field.onChange(localDay(date))}
+                value={dateFromLocal(field.value)}
+              />
             )}
           />
           <Controller
@@ -172,18 +157,6 @@ const styles = StyleSheet.create({
   description: {
     minHeight: 96,
     textAlignVertical: 'top',
-  },
-  wrap: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: Spacing.two,
-  },
-  chip: {
-    borderRadius: Radius.pill,
-    borderWidth: 1,
-    justifyContent: 'center',
-    minHeight: 48,
-    paddingHorizontal: Spacing.three,
   },
   before: {
     alignItems: 'center',

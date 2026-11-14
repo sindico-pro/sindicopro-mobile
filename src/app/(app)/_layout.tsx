@@ -11,6 +11,8 @@ export default function AppLayout() {
     <CondoProvider>
       <Stack
         screenOptions={{
+          headerBackTitle: 'Voltar',
+          headerBackTitleStyle: { fontSize: 17 },
           headerShadowVisible: false,
           headerStyle: { backgroundColor: theme.background },
           headerTintColor: theme.primary,
@@ -28,6 +30,13 @@ export default function AppLayout() {
             contentStyle: { backgroundColor: theme.surface },
           }}
         />
+        <Stack.Screen name="realizations/index" options={{ title: 'Realizações' }} />
+        <Stack.Screen name="realizations/new" options={{ title: 'Criar Realização' }} />
+        <Stack.Screen name="realizations/[id]" options={{ title: 'Realização' }} />
+        <Stack.Screen name="occurrences/new" options={{ title: 'Criar ocorrência' }} />
+        <Stack.Screen name="occurrences/[id]" options={{ title: 'Ocorrência' }} />
+        <Stack.Screen name="tasks/new" options={{ title: 'Criar tarefa' }} />
+        <Stack.Screen name="tasks/[id]" options={{ title: 'Tarefa' }} />
       </Stack>
     </CondoProvider>
   )

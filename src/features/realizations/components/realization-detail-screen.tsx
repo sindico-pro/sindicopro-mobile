@@ -22,7 +22,8 @@ export function RealizationDetailScreen() {
 
   return (
     <Screen edges={['left', 'right', 'bottom']}>
-      <Stack.Screen options={{ title: realization.data?.title ?? 'Realização' }} />
+      <Stack.Title>{realization.data?.title ?? 'Realização'}</Stack.Title>
+      <Stack.Screen.BackButton>Voltar</Stack.Screen.BackButton>
       {realization.isPending ? <StateView loading /> : null}
       {realization.error ? (
         <StateView error={errorMessage(realization.error)} onRetry={() => void realization.refetch()} />

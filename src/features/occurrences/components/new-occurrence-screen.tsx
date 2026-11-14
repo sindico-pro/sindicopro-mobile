@@ -2,16 +2,16 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useRouter } from 'expo-router'
 import { useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
-import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, View } from 'react-native'
+import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet } from 'react-native'
 
-import { ThemedText } from '@/components/themed-text'
 import { Banner } from '@/components/ui/banner'
 import { Button } from '@/components/ui/button'
+import { DateTimeField } from '@/components/ui/date-time-field'
 import { PhotoPicker } from '@/components/ui/photo-picker'
 import { Screen } from '@/components/ui/screen'
 import { StateView } from '@/components/ui/state-view'
 import { TextField } from '@/components/ui/text-field'
-import { Radius, Spacing } from '@/constants/theme'
+import { Spacing } from '@/constants/theme'
 import { useSession } from '@/features/auth/session/session-provider'
 import { useSelectedCondo } from '@/features/condo/use-selected-condo'
 import {
@@ -20,12 +20,10 @@ import {
 } from '@/features/occurrences/create-occurrence-schema'
 import { useOccurrenceAccess } from '@/features/occurrences/use-occurrence'
 import { useOccurrenceActions } from '@/features/occurrences/use-occurrence-actions'
-import { useTheme } from '@/hooks/use-theme'
 import { errorMessage } from '@/lib/graphql/errors'
-import { combineLocal, localDay, localTime, recentDays } from '@/lib/local-date'
+import { combineLocal, dateFromLocal, endOfLocalDay, localDay, localTime } from '@/lib/local-date'
 
 export function NewOccurrenceScreen() {
-  const theme = useTheme()
   const router = useRouter()
   const { user } = useSession()
   const condo = useSelectedCondo()
@@ -99,48 +97,30 @@ export function NewOccurrenceScreen() {
               />
             )}
           />
-          <ThemedText type="smallBold">Quando aconteceu</ThemedText>
           <Controller
             control={form.control}
             name="day"
-            render={({ field }) => (
-              <View style={styles.wrap}>
-                {recentDays(7).map((item) => {
-                  const selected = field.value === item.day
-                  return (
-                    <Pressable
-                      accessibilityRole="button"
-                      accessibilityState={{ selected }}
-                      key={item.day}
-                      onPress={() => field.onChange(item.day)}
-                      style={[
-                        styles.chip,
-                        {
-                          backgroundColor: selected ? theme.primary : theme.surface,
-                          borderColor: selected ? theme.primary : theme.border,
-                        },
-                      ]}>
-                      <ThemedText type="smallBold" style={{ color: selected ? theme.onPrimary : theme.text }}>
-                        {item.label}
-                      </ThemedText>
-                    </Pressable>
-                  )
-                })}
-              </View>
+            render={({ field, fieldState }) => (
+              <DateTimeField
+                error={fieldState.error?.message}
+                label="Quando aconteceu"
+                maximumDate={endOfLocalDay()}
+                mode="date"
+                onChange={(date) => field.onChange(localDay(date))}
+                value={dateFromLocal(field.value, form.getValues('time'))}
+              />
             )}
           />
           <Controller
             control={form.control}
             name="time"
             render={({ field, fieldState }) => (
-              <TextField
+              <DateTimeField
                 error={fieldState.error?.message}
-                keyboardType="numbers-and-punctuation"
                 label="Horário"
-                onBlur={field.onBlur}
-                onChangeText={field.onChange}
-                placeholder="14:30"
-                value={field.value}
+                mode="time"
+                onChange={(date) => field.onChange(localTime(date))}
+                value={dateFromLocal(form.getValues('day'), field.value)}
               />
             )}
           />
@@ -163,17 +143,5 @@ const styles = StyleSheet.create({
   description: {
     minHeight: 96,
     textAlignVertical: 'top',
-  },
-  wrap: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: Spacing.two,
-  },
-  chip: {
-    borderRadius: Radius.pill,
-    borderWidth: 1,
-    justifyContent: 'center',
-    minHeight: 48,
-    paddingHorizontal: Spacing.three,
   },
 })

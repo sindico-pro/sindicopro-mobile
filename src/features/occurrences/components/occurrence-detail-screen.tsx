@@ -42,7 +42,8 @@ export function OccurrenceDetailScreen() {
 
   return (
     <Screen edges={['left', 'right', 'bottom']}>
-      <Stack.Screen options={{ title: occurrence.data?.title ?? 'Ocorrência' }} />
+      <Stack.Title>{occurrence.data?.title ?? 'Ocorrência'}</Stack.Title>
+      <Stack.Screen.BackButton>Voltar</Stack.Screen.BackButton>
       {occurrence.isPending ? <StateView loading /> : null}
       {occurrence.error ? (
         <StateView error={errorMessage(occurrence.error)} onRetry={() => void occurrence.refetch()} />

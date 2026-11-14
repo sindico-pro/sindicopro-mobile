@@ -5,7 +5,8 @@ import { RealizationsScreen } from '@/features/realizations/components/realizati
 export default function RealizationsRoute() {
   return (
     <>
-      <Stack.Screen options={{ title: 'Realizações' }} />
+      <Stack.Title>Realizações</Stack.Title>
+      <Stack.Screen.BackButton>Voltar</Stack.Screen.BackButton>
       <RealizationsScreen />
     </>
   )

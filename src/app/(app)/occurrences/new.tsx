@@ -5,7 +5,8 @@ import { NewOccurrenceScreen } from '@/features/occurrences/components/new-occur
 export default function NewOccurrenceRoute() {
   return (
     <>
-      <Stack.Screen options={{ presentation: 'modal', title: 'Nova ocorrência' }} />
+      <Stack.Title>Criar ocorrência</Stack.Title>
+      <Stack.Screen.BackButton>Voltar</Stack.Screen.BackButton>
       <NewOccurrenceScreen />
     </>
   )

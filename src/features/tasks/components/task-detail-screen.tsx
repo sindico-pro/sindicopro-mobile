@@ -164,7 +164,8 @@ export function TaskDetailScreen() {
 
   return (
     <Screen edges={['left', 'right', 'bottom']}>
-      <Stack.Screen options={{ headerBackTitle: 'Voltar', title: task.data?.title ?? 'Tarefa' }} />
+      <Stack.Title>{task.data?.title ?? 'Tarefa'}</Stack.Title>
+      <Stack.Screen.BackButton>Voltar</Stack.Screen.BackButton>
       {task.isPending ? <StateView loading /> : null}
       {task.error ? <StateView error={errorMessage(task.error)} onRetry={() => void task.refetch()} /> : null}
       {task.data ? (
