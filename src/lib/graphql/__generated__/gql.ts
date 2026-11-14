@@ -22,6 +22,15 @@ type Documents = {
     "\n  query MobileCondos {\n    mobileCondos {\n      id\n      name\n      features\n    }\n  }\n": typeof types.MobileCondosDocument,
     "\n  query MobileHome($condoId: String!) {\n    mobileHome(condoId: $condoId) {\n      occurrences {\n        open\n        withoutResponse\n        pendingManager\n        closed\n      }\n      tasks {\n        overdue\n        dueToday\n        dueTomorrow\n      }\n      recentRealizations {\n        id\n        title\n        heldIn\n        coverImageUrl\n      }\n    }\n  }\n": typeof types.MobileHomeDocument,
     "\n  query MobileOccurrences($condoId: String!, $filter: MobileOccurrenceFilter!) {\n    mobileOccurrences(condoId: $condoId, filter: $filter) {\n      id\n      title\n      status\n      occurredAt\n      createdAt\n    }\n  }\n": typeof types.MobileOccurrencesDocument,
+    "\n  query MobileOccurrence($id: String!) {\n    mobileOccurrence(id: $id) {\n      id\n      title\n      description\n      status\n      occurredAt\n      authorName\n      fileUrls\n      responses {\n        id\n        content\n        fromManager\n        authorName\n        fileUrls\n        createdAt\n      }\n      canRespond\n      canClose\n    }\n  }\n": typeof types.MobileOccurrenceDocument,
+    "\n  query MobileOccurrenceAccess($condoId: String!) {\n    mobileOccurrenceAccess(condoId: $condoId) {\n      canCreate\n    }\n  }\n": typeof types.MobileOccurrenceAccessDocument,
+    "\n  mutation MobileCreateOccurrence($data: MobileCreateOccurrenceInput!) {\n    mobileCreateOccurrence(data: $data) {\n      id\n      title\n    }\n  }\n": typeof types.MobileCreateOccurrenceDocument,
+    "\n  mutation MobileRespondOccurrence($id: String!, $content: String!, $fileUrls: [String!]) {\n    mobileRespondOccurrence(id: $id, content: $content, fileUrls: $fileUrls) {\n      id\n    }\n  }\n": typeof types.MobileRespondOccurrenceDocument,
+    "\n  mutation MobileCloseOccurrence($id: String!) {\n    mobileCloseOccurrence(id: $id) {\n      id\n    }\n  }\n": typeof types.MobileCloseOccurrenceDocument,
+    "\n  query MobileRealizations($condoId: String!, $limit: Int, $offset: Int) {\n    mobileRealizations(condoId: $condoId, limit: $limit, offset: $offset) {\n      id\n      title\n      heldIn\n      coverImageUrl\n    }\n  }\n": typeof types.MobileRealizationsDocument,
+    "\n  query MobileRealization($id: String!) {\n    mobileRealization(id: $id) {\n      id\n      title\n      description\n      heldIn\n      photoUrls\n      beforePhotoUrls\n      canCreate\n    }\n  }\n": typeof types.MobileRealizationDocument,
+    "\n  query MobileRealizationAccess($condoId: String!) {\n    mobileRealizationAccess(condoId: $condoId) {\n      canCreate\n    }\n  }\n": typeof types.MobileRealizationAccessDocument,
+    "\n  mutation MobileCreateRealization($data: MobileCreateRealizationInput!) {\n    mobileCreateRealization(data: $data) {\n      id\n      title\n    }\n  }\n": typeof types.MobileCreateRealizationDocument,
     "\n  query MobileTaskCounts($condoId: String!) {\n    mobileTaskCounts(condoId: $condoId) {\n      todo\n      doing\n      done\n      overdue\n      canCreate\n      canExecute\n      mineLocked\n    }\n  }\n": typeof types.MobileTaskCountsDocument,
     "\n  query MobileTaskList(\n    $condoId: String!\n    $status: MobileTaskStatus!\n    $due: MobileTaskDue\n    $mine: Boolean\n    $limit: Int\n    $offset: Int\n  ) {\n    mobileTaskList(\n      condoId: $condoId\n      status: $status\n      due: $due\n      mine: $mine\n      limit: $limit\n      offset: $offset\n    ) {\n      id\n      title\n      priority\n      dueDate\n      isOverdue\n      responsibleName\n      status\n      photoCount\n      commentCount\n    }\n  }\n": typeof types.MobileTaskListDocument,
     "\n  query MobileTask($id: String!) {\n    mobileTask(id: $id) {\n      id\n      title\n      description\n      priority\n      dueDate\n      isOverdue\n      status\n      responsibleId\n      responsibleName\n      beforePhotoUrls\n      afterPhotoUrls\n      comments {\n        id\n        content\n        authorName\n        createdAt\n      }\n      startedByName\n      startedAt\n      completedByName\n      completedAt\n      occurrenceId\n      occurrenceTitle\n      canExecute\n      canEdit\n      canCreate\n    }\n  }\n": typeof types.MobileTaskDocument,
@@ -40,6 +49,15 @@ const documents: Documents = {
     "\n  query MobileCondos {\n    mobileCondos {\n      id\n      name\n      features\n    }\n  }\n": types.MobileCondosDocument,
     "\n  query MobileHome($condoId: String!) {\n    mobileHome(condoId: $condoId) {\n      occurrences {\n        open\n        withoutResponse\n        pendingManager\n        closed\n      }\n      tasks {\n        overdue\n        dueToday\n        dueTomorrow\n      }\n      recentRealizations {\n        id\n        title\n        heldIn\n        coverImageUrl\n      }\n    }\n  }\n": types.MobileHomeDocument,
     "\n  query MobileOccurrences($condoId: String!, $filter: MobileOccurrenceFilter!) {\n    mobileOccurrences(condoId: $condoId, filter: $filter) {\n      id\n      title\n      status\n      occurredAt\n      createdAt\n    }\n  }\n": types.MobileOccurrencesDocument,
+    "\n  query MobileOccurrence($id: String!) {\n    mobileOccurrence(id: $id) {\n      id\n      title\n      description\n      status\n      occurredAt\n      authorName\n      fileUrls\n      responses {\n        id\n        content\n        fromManager\n        authorName\n        fileUrls\n        createdAt\n      }\n      canRespond\n      canClose\n    }\n  }\n": types.MobileOccurrenceDocument,
+    "\n  query MobileOccurrenceAccess($condoId: String!) {\n    mobileOccurrenceAccess(condoId: $condoId) {\n      canCreate\n    }\n  }\n": types.MobileOccurrenceAccessDocument,
+    "\n  mutation MobileCreateOccurrence($data: MobileCreateOccurrenceInput!) {\n    mobileCreateOccurrence(data: $data) {\n      id\n      title\n    }\n  }\n": types.MobileCreateOccurrenceDocument,
+    "\n  mutation MobileRespondOccurrence($id: String!, $content: String!, $fileUrls: [String!]) {\n    mobileRespondOccurrence(id: $id, content: $content, fileUrls: $fileUrls) {\n      id\n    }\n  }\n": types.MobileRespondOccurrenceDocument,
+    "\n  mutation MobileCloseOccurrence($id: String!) {\n    mobileCloseOccurrence(id: $id) {\n      id\n    }\n  }\n": types.MobileCloseOccurrenceDocument,
+    "\n  query MobileRealizations($condoId: String!, $limit: Int, $offset: Int) {\n    mobileRealizations(condoId: $condoId, limit: $limit, offset: $offset) {\n      id\n      title\n      heldIn\n      coverImageUrl\n    }\n  }\n": types.MobileRealizationsDocument,
+    "\n  query MobileRealization($id: String!) {\n    mobileRealization(id: $id) {\n      id\n      title\n      description\n      heldIn\n      photoUrls\n      beforePhotoUrls\n      canCreate\n    }\n  }\n": types.MobileRealizationDocument,
+    "\n  query MobileRealizationAccess($condoId: String!) {\n    mobileRealizationAccess(condoId: $condoId) {\n      canCreate\n    }\n  }\n": types.MobileRealizationAccessDocument,
+    "\n  mutation MobileCreateRealization($data: MobileCreateRealizationInput!) {\n    mobileCreateRealization(data: $data) {\n      id\n      title\n    }\n  }\n": types.MobileCreateRealizationDocument,
     "\n  query MobileTaskCounts($condoId: String!) {\n    mobileTaskCounts(condoId: $condoId) {\n      todo\n      doing\n      done\n      overdue\n      canCreate\n      canExecute\n      mineLocked\n    }\n  }\n": types.MobileTaskCountsDocument,
     "\n  query MobileTaskList(\n    $condoId: String!\n    $status: MobileTaskStatus!\n    $due: MobileTaskDue\n    $mine: Boolean\n    $limit: Int\n    $offset: Int\n  ) {\n    mobileTaskList(\n      condoId: $condoId\n      status: $status\n      due: $due\n      mine: $mine\n      limit: $limit\n      offset: $offset\n    ) {\n      id\n      title\n      priority\n      dueDate\n      isOverdue\n      responsibleName\n      status\n      photoCount\n      commentCount\n    }\n  }\n": types.MobileTaskListDocument,
     "\n  query MobileTask($id: String!) {\n    mobileTask(id: $id) {\n      id\n      title\n      description\n      priority\n      dueDate\n      isOverdue\n      status\n      responsibleId\n      responsibleName\n      beforePhotoUrls\n      afterPhotoUrls\n      comments {\n        id\n        content\n        authorName\n        createdAt\n      }\n      startedByName\n      startedAt\n      completedByName\n      completedAt\n      occurrenceId\n      occurrenceTitle\n      canExecute\n      canEdit\n      canCreate\n    }\n  }\n": types.MobileTaskDocument,
@@ -79,6 +97,42 @@ export function graphql(source: "\n  query MobileHome($condoId: String!) {\n    
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n  query MobileOccurrences($condoId: String!, $filter: MobileOccurrenceFilter!) {\n    mobileOccurrences(condoId: $condoId, filter: $filter) {\n      id\n      title\n      status\n      occurredAt\n      createdAt\n    }\n  }\n"): typeof import('./graphql').MobileOccurrencesDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  query MobileOccurrence($id: String!) {\n    mobileOccurrence(id: $id) {\n      id\n      title\n      description\n      status\n      occurredAt\n      authorName\n      fileUrls\n      responses {\n        id\n        content\n        fromManager\n        authorName\n        fileUrls\n        createdAt\n      }\n      canRespond\n      canClose\n    }\n  }\n"): typeof import('./graphql').MobileOccurrenceDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  query MobileOccurrenceAccess($condoId: String!) {\n    mobileOccurrenceAccess(condoId: $condoId) {\n      canCreate\n    }\n  }\n"): typeof import('./graphql').MobileOccurrenceAccessDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation MobileCreateOccurrence($data: MobileCreateOccurrenceInput!) {\n    mobileCreateOccurrence(data: $data) {\n      id\n      title\n    }\n  }\n"): typeof import('./graphql').MobileCreateOccurrenceDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation MobileRespondOccurrence($id: String!, $content: String!, $fileUrls: [String!]) {\n    mobileRespondOccurrence(id: $id, content: $content, fileUrls: $fileUrls) {\n      id\n    }\n  }\n"): typeof import('./graphql').MobileRespondOccurrenceDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation MobileCloseOccurrence($id: String!) {\n    mobileCloseOccurrence(id: $id) {\n      id\n    }\n  }\n"): typeof import('./graphql').MobileCloseOccurrenceDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  query MobileRealizations($condoId: String!, $limit: Int, $offset: Int) {\n    mobileRealizations(condoId: $condoId, limit: $limit, offset: $offset) {\n      id\n      title\n      heldIn\n      coverImageUrl\n    }\n  }\n"): typeof import('./graphql').MobileRealizationsDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  query MobileRealization($id: String!) {\n    mobileRealization(id: $id) {\n      id\n      title\n      description\n      heldIn\n      photoUrls\n      beforePhotoUrls\n      canCreate\n    }\n  }\n"): typeof import('./graphql').MobileRealizationDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  query MobileRealizationAccess($condoId: String!) {\n    mobileRealizationAccess(condoId: $condoId) {\n      canCreate\n    }\n  }\n"): typeof import('./graphql').MobileRealizationAccessDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation MobileCreateRealization($data: MobileCreateRealizationInput!) {\n    mobileCreateRealization(data: $data) {\n      id\n      title\n    }\n  }\n"): typeof import('./graphql').MobileCreateRealizationDocument;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

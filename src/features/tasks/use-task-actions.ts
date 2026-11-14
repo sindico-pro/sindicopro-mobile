@@ -3,9 +3,10 @@ import { useState } from 'react'
 
 import { tasksApi, type CreateTaskInput, type PhotoKind } from './api/tasks-api'
 import type { TaskStatus } from './due-phrase'
-import { compressTaskPhoto, uploadTaskPhoto } from './upload-task-photo'
 import { useSession } from '@/features/auth/session/session-provider'
+import { getKanbanBucket } from '@/lib/env'
 import { AppError } from '@/lib/graphql/errors'
+import { compressPhoto, uploadPhoto } from '@/lib/upload-photo'
 
 export function useTaskActions(condoId: string | null) {
   const queryClient = useQueryClient()
@@ -63,11 +64,13 @@ export function useTaskActions(condoId: string | null) {
 
   async function sendPhoto(taskId: string, kind: PhotoKind, uri: string, onProgress?: (ratio: number) => void) {
     const scope = requireScope()
-    const compressed = await compressTaskPhoto(uri)
-    const url = await uploadTaskPhoto({
+    const compressed = await compressPhoto(uri)
+    const url = await uploadPhoto({
       userId: scope.personId,
       condoId: scope.condoId,
       uri: compressed,
+      bucket: getKanbanBucket(),
+      folderPath: 'tasks',
       onProgress,
     })
     await tasksApi.addPhotos(taskId, kind, [url])
@@ -108,11 +111,13 @@ export function useTaskActions(condoId: string | null) {
     try {
       let photoUrls: string[] | undefined
       if (input.photoUri) {
-        const compressed = await compressTaskPhoto(input.photoUri)
-        const url = await uploadTaskPhoto({
+        const compressed = await compressPhoto(input.photoUri)
+        const url = await uploadPhoto({
           userId: scope.personId,
           condoId: scope.condoId,
           uri: compressed,
+          bucket: getKanbanBucket(),
+          folderPath: 'tasks',
         })
         photoUrls = [url]
       }

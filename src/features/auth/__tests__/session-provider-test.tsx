@@ -227,3 +227,24 @@ it('logout durante escrita pendente apaga a credencial depois que a escrita term
   expect(saved.clearStoredSession).toHaveBeenCalled()
   expect(tokenMemory.getAccess()).toBeNull()
 })
+it('mantém o usuário depois do prazo em que o cache descartaria a identidade', async () => {
+  jest.useFakeTimers({ advanceTimers: true })
+  // useFakeTimers limpa a flag que o React Native usa para reconhecer o act().
+  globalThis.IS_REACT_ACT_ENVIRONMENT = true
+  const view = await setup()
+  try {
+    expect(view.getByText('signedOut')).toBeTruthy()
+    await act(async () => {
+      await session.signIn('ana@example.com', 'senha')
+    })
+    expect(view.getByText('Ana')).toBeTruthy()
+    await act(() => {
+      jest.advanceTimersByTime(6 * 60 * 1000)
+    })
+    expect(view.getByText('Ana')).toBeTruthy()
+    expect(session.user).toMatchObject({ id: 'person-1', name: 'Ana' })
+    expect(api.refresh).not.toHaveBeenCalled()
+  } finally {
+    jest.useRealTimers()
+  }
+})

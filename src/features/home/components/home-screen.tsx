@@ -105,23 +105,31 @@ export function HomeScreen() {
               </Section>
             ) : null}
             {data.recentRealizations ? (
-              <Section title="Últimas realizações">
+              <Section
+                action={{ label: 'Ver todas', onPress: () => router.navigate('/realizations') }}
+                title="Últimas realizações">
                 {data.recentRealizations.length ? (
                   <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.carousel}>
                     {data.recentRealizations.map((item) => (
-                      <Card key={item.id} style={styles.realization}>
-                        {item.coverImageUrl ? (
-                          <Image source={{ uri: item.coverImageUrl }} style={styles.cover} />
-                        ) : (
-                          <View style={[styles.cover, styles.placeholder, { backgroundColor: theme.backgroundElement }]}>
-                            <ImageOff color={theme.textSecondary} size={28} />
-                          </View>
-                        )}
-                        <ThemedText type="smallBold">{item.title}</ThemedText>
-                        <ThemedText themeColor="textSecondary" type="small">
-                          {formatWhen(item.heldIn) ?? 'Sem data'}
-                        </ThemedText>
-                      </Card>
+                      <Pressable
+                        accessibilityLabel={item.title}
+                        accessibilityRole="button"
+                        key={item.id}
+                        onPress={() => router.navigate({ pathname: '/realizations/[id]', params: { id: item.id } })}>
+                        <Card style={styles.realization}>
+                          {item.coverImageUrl ? (
+                            <Image source={{ uri: item.coverImageUrl }} style={styles.cover} />
+                          ) : (
+                            <View style={[styles.cover, styles.placeholder, { backgroundColor: theme.backgroundElement }]}>
+                              <ImageOff color={theme.textSecondary} size={28} />
+                            </View>
+                          )}
+                          <ThemedText type="smallBold">{item.title}</ThemedText>
+                          <ThemedText themeColor="textSecondary" type="small">
+                            {formatWhen(item.heldIn) ?? 'Sem data'}
+                          </ThemedText>
+                        </Card>
+                      </Pressable>
                     ))}
                   </ScrollView>
                 ) : (
@@ -141,10 +149,27 @@ export function HomeScreen() {
   )
 }
 
-function Section({ title, children }: { title: string; children: ReactNode }) {
+function Section({
+  title,
+  action,
+  children,
+}: {
+  title: string
+  action?: { label: string; onPress: () => void }
+  children: ReactNode
+}) {
   return (
     <View style={styles.section}>
-      <ThemedText type="smallBold">{title}</ThemedText>
+      <View style={styles.sectionHeader}>
+        <ThemedText type="smallBold">{title}</ThemedText>
+        {action ? (
+          <Pressable accessibilityRole="button" onPress={action.onPress}>
+            <ThemedText type="smallBold" themeColor="primary">
+              {action.label}
+            </ThemedText>
+          </Pressable>
+        ) : null}
+      </View>
       {children}
     </View>
   )
@@ -201,6 +226,11 @@ const styles = StyleSheet.create({
   },
   section: {
     gap: Spacing.two,
+  },
+  sectionHeader: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
   },
   grid: {
     flexDirection: 'row',

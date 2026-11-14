@@ -113,6 +113,8 @@ export function SessionProvider({
       if (!current(epoch)) return
       tokenMemory.set(tokens.accessToken, tokens.refreshToken)
       recoveryRefresh.current = null
+      // Sem useQuery observando a chave, o gcTime padrão apaga a identidade após 5 minutos.
+      client.setQueryDefaults(IDENTITY_KEY, { gcTime: Infinity, staleTime: Infinity })
       client.setQueryData(IDENTITY_KEY, identity)
       updateTokenRevision()
       dispatch({ type: 'signedIn' })

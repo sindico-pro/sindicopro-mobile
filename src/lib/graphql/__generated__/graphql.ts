@@ -9,6 +9,23 @@ export type CreateAuthInput = {
   password: string;
 };
 
+export type MobileCreateOccurrenceInput = {
+  condoId: string;
+  description: string;
+  fileUrls?: Array<string> | null | undefined;
+  occurredAt: string;
+  title: string;
+};
+
+export type MobileCreateRealizationInput = {
+  beforePhotoUrls?: Array<string> | null | undefined;
+  condoId: string;
+  description: string;
+  heldIn: string;
+  photoUrls: Array<string>;
+  title: string;
+};
+
 export type MobileCreateTaskInput = {
   condoId: string;
   description?: string | null | undefined;
@@ -88,6 +105,73 @@ export type MobileOccurrencesQueryVariables = Exact<{
 
 
 export type MobileOccurrencesQuery = { mobileOccurrences: Array<{ id: string, title: string, status: string, occurredAt: string | null, createdAt: string | null }> };
+
+export type MobileOccurrenceQueryVariables = Exact<{
+  id: string;
+}>;
+
+
+export type MobileOccurrenceQuery = { mobileOccurrence: { id: string, title: string, description: string, status: string, occurredAt: string | null, authorName: string, fileUrls: Array<string>, canRespond: boolean, canClose: boolean, responses: Array<{ id: string, content: string, fromManager: boolean, authorName: string, fileUrls: Array<string>, createdAt: string }> } };
+
+export type MobileOccurrenceAccessQueryVariables = Exact<{
+  condoId: string;
+}>;
+
+
+export type MobileOccurrenceAccessQuery = { mobileOccurrenceAccess: { canCreate: boolean } };
+
+export type MobileCreateOccurrenceMutationVariables = Exact<{
+  data: MobileCreateOccurrenceInput;
+}>;
+
+
+export type MobileCreateOccurrenceMutation = { mobileCreateOccurrence: { id: string, title: string } };
+
+export type MobileRespondOccurrenceMutationVariables = Exact<{
+  id: string;
+  content: string;
+  fileUrls?: Array<string> | string | null | undefined;
+}>;
+
+
+export type MobileRespondOccurrenceMutation = { mobileRespondOccurrence: { id: string } };
+
+export type MobileCloseOccurrenceMutationVariables = Exact<{
+  id: string;
+}>;
+
+
+export type MobileCloseOccurrenceMutation = { mobileCloseOccurrence: { id: string } };
+
+export type MobileRealizationsQueryVariables = Exact<{
+  condoId: string;
+  limit?: number | null | undefined;
+  offset?: number | null | undefined;
+}>;
+
+
+export type MobileRealizationsQuery = { mobileRealizations: Array<{ id: string, title: string, heldIn: string | null, coverImageUrl: string | null }> };
+
+export type MobileRealizationQueryVariables = Exact<{
+  id: string;
+}>;
+
+
+export type MobileRealizationQuery = { mobileRealization: { id: string, title: string, description: string, heldIn: string | null, photoUrls: Array<string>, beforePhotoUrls: Array<string>, canCreate: boolean } };
+
+export type MobileRealizationAccessQueryVariables = Exact<{
+  condoId: string;
+}>;
+
+
+export type MobileRealizationAccessQuery = { mobileRealizationAccess: { canCreate: boolean } };
+
+export type MobileCreateRealizationMutationVariables = Exact<{
+  data: MobileCreateRealizationInput;
+}>;
+
+
+export type MobileCreateRealizationMutation = { mobileCreateRealization: { id: string, title: string } };
 
 export type MobileTaskCountsQueryVariables = Exact<{
   condoId: string;
@@ -261,6 +345,96 @@ export const MobileOccurrencesDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<MobileOccurrencesQuery, MobileOccurrencesQueryVariables>;
+export const MobileOccurrenceDocument = new TypedDocumentString(`
+    query MobileOccurrence($id: String!) {
+  mobileOccurrence(id: $id) {
+    id
+    title
+    description
+    status
+    occurredAt
+    authorName
+    fileUrls
+    responses {
+      id
+      content
+      fromManager
+      authorName
+      fileUrls
+      createdAt
+    }
+    canRespond
+    canClose
+  }
+}
+    `) as unknown as TypedDocumentString<MobileOccurrenceQuery, MobileOccurrenceQueryVariables>;
+export const MobileOccurrenceAccessDocument = new TypedDocumentString(`
+    query MobileOccurrenceAccess($condoId: String!) {
+  mobileOccurrenceAccess(condoId: $condoId) {
+    canCreate
+  }
+}
+    `) as unknown as TypedDocumentString<MobileOccurrenceAccessQuery, MobileOccurrenceAccessQueryVariables>;
+export const MobileCreateOccurrenceDocument = new TypedDocumentString(`
+    mutation MobileCreateOccurrence($data: MobileCreateOccurrenceInput!) {
+  mobileCreateOccurrence(data: $data) {
+    id
+    title
+  }
+}
+    `) as unknown as TypedDocumentString<MobileCreateOccurrenceMutation, MobileCreateOccurrenceMutationVariables>;
+export const MobileRespondOccurrenceDocument = new TypedDocumentString(`
+    mutation MobileRespondOccurrence($id: String!, $content: String!, $fileUrls: [String!]) {
+  mobileRespondOccurrence(id: $id, content: $content, fileUrls: $fileUrls) {
+    id
+  }
+}
+    `) as unknown as TypedDocumentString<MobileRespondOccurrenceMutation, MobileRespondOccurrenceMutationVariables>;
+export const MobileCloseOccurrenceDocument = new TypedDocumentString(`
+    mutation MobileCloseOccurrence($id: String!) {
+  mobileCloseOccurrence(id: $id) {
+    id
+  }
+}
+    `) as unknown as TypedDocumentString<MobileCloseOccurrenceMutation, MobileCloseOccurrenceMutationVariables>;
+export const MobileRealizationsDocument = new TypedDocumentString(`
+    query MobileRealizations($condoId: String!, $limit: Int, $offset: Int) {
+  mobileRealizations(condoId: $condoId, limit: $limit, offset: $offset) {
+    id
+    title
+    heldIn
+    coverImageUrl
+  }
+}
+    `) as unknown as TypedDocumentString<MobileRealizationsQuery, MobileRealizationsQueryVariables>;
+export const MobileRealizationDocument = new TypedDocumentString(`
+    query MobileRealization($id: String!) {
+  mobileRealization(id: $id) {
+    id
+    title
+    description
+    heldIn
+    photoUrls
+    beforePhotoUrls
+    canCreate
+  }
+}
+    `) as unknown as TypedDocumentString<MobileRealizationQuery, MobileRealizationQueryVariables>;
+export const MobileRealizationAccessDocument = new TypedDocumentString(`
+    query MobileRealizationAccess($condoId: String!) {
+  mobileRealizationAccess(condoId: $condoId) {
+    canCreate
+  }
+}
+    `) as unknown as TypedDocumentString<MobileRealizationAccessQuery, MobileRealizationAccessQueryVariables>;
+export const MobileCreateRealizationDocument = new TypedDocumentString(`
+    mutation MobileCreateRealization($data: MobileCreateRealizationInput!) {
+  mobileCreateRealization(data: $data) {
+    id
+    title
+  }
+}
+    `) as unknown as TypedDocumentString<MobileCreateRealizationMutation, MobileCreateRealizationMutationVariables>;
 export const MobileTaskCountsDocument = new TypedDocumentString(`
     query MobileTaskCounts($condoId: String!) {
   mobileTaskCounts(condoId: $condoId) {

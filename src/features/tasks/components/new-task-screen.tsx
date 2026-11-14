@@ -18,7 +18,7 @@ import { createTaskSchema, type CreateTaskValues } from '@/features/tasks/create
 import { dueDateForChoice, upcomingDays, type DueChoice } from '@/features/tasks/due-phrase'
 import { useTaskActions } from '@/features/tasks/use-task-actions'
 import { useTaskFormOptions } from '@/features/tasks/use-task'
-import { pickTaskPhoto } from '@/features/tasks/upload-task-photo'
+import { pickPhoto } from '@/lib/upload-photo'
 import { useTheme } from '@/hooks/use-theme'
 import { errorMessage } from '@/lib/graphql/errors'
 
@@ -64,7 +64,7 @@ export function NewTaskScreen() {
 
   async function choosePhoto(source: 'camera' | 'library') {
     try {
-      const picked = await pickTaskPhoto(source)
+      const picked = await pickPhoto(source)
       if (picked) setPhoto(picked.uri)
     } catch (caught) {
       setError(errorMessage(caught))

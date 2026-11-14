@@ -3,6 +3,7 @@ import { BookMarked, Calendar } from 'lucide-react-native'
 import { FlatList, RefreshControl, StyleSheet, View } from 'react-native'
 
 import { ThemedText } from '@/components/themed-text'
+import { Fab } from '@/components/ui/fab'
 import { FilterChips } from '@/components/ui/filter-chips'
 import { Icon } from '@/components/ui/icon'
 import { ListRow } from '@/components/ui/list-row'
@@ -18,6 +19,7 @@ import {
   type OccurrenceItem,
 } from '@/features/occurrences/api/occurrences-api'
 import { useOccurrences } from '@/features/occurrences/use-occurrences'
+import { useOccurrenceAccess } from '@/features/occurrences/use-occurrence'
 import { formatDay } from '@/lib/format-date'
 import { errorMessage } from '@/lib/graphql/errors'
 import { useTheme } from '@/hooks/use-theme'
@@ -46,6 +48,7 @@ export function OccurrencesScreen() {
   const condoId = condo.selected?.id ?? null
   const home = useHome(user?.id ?? null, condoId)
   const list = useOccurrences(user?.id ?? null, condoId, filter)
+  const access = useOccurrenceAccess(user?.id ?? null, condoId)
   const counts = home.data?.occurrences
 
   return (
@@ -94,14 +97,19 @@ export function OccurrencesScreen() {
               onRefresh={() => void list.refetch()}
             />
           }
-          renderItem={({ item }) => <OccurrenceRow item={item} />}
+          renderItem={({ item }) => (
+            <OccurrenceRow item={item} onPress={() => router.push({ pathname: '/occurrences/[id]', params: { id: item.id } })} />
+          )}
         />
+      ) : null}
+      {access.data?.canCreate ? (
+        <Fab label="Nova ocorrência" onPress={() => router.push('/occurrences/new')} />
       ) : null}
     </Screen>
   )
 }
 
-function OccurrenceRow({ item }: { item: OccurrenceItem }) {
+function OccurrenceRow({ item, onPress }: { item: OccurrenceItem; onPress: () => void }) {
   const theme = useTheme()
   const when = formatDay(item.occurredAt ?? item.createdAt)
   const badge = statusBadge[item.status] ?? { label: item.status, tone: 'neutral' as const }
@@ -120,6 +128,7 @@ function OccurrenceRow({ item }: { item: OccurrenceItem }) {
         ) : null
       }
       title={item.title}
+      onPress={onPress}
     />
   )
 }
@@ -130,10 +139,12 @@ const styles = StyleSheet.create({
   },
   list: {
     paddingTop: Spacing.two,
+    paddingBottom: 140,
   },
   empty: {
     flexGrow: 1,
     justifyContent: 'center',
+    paddingBottom: 140,
   },
   meta: {
     alignItems: 'center',

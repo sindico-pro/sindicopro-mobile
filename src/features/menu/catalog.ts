@@ -20,7 +20,7 @@ export type CatalogEntry = {
 export const catalog: CatalogEntry[] = [
   { id: 'occurrences', name: 'Ocorrências', group: 'Operação', synonyms: ['chamado', 'reclamação'], slug: 'occurrence', action: 'route', route: '/occurrences', icon: 'BookMarked' },
   { id: 'tasks', name: 'Tarefas', group: 'Operação', synonyms: ['kanban', 'atividade'], slug: 'kanban', action: 'route', route: '/tasks', icon: 'SquareKanban' },
-  { id: 'realizations', name: 'Realizações', group: 'Operação', synonyms: ['foto', 'execução'], slug: 'realization', action: 'route', route: null, icon: 'Waypoints' },
+  { id: 'realizations', name: 'Realizações', group: 'Operação', synonyms: ['foto', 'execução'], slug: 'realization', action: 'route', route: '/realizations', icon: 'Waypoints' },
   { id: 'patrol', name: 'Ronda', group: 'Operação', synonyms: ['ronda', 'patrulha'], slug: 'patrol', action: 'route', route: null, icon: 'ShieldCheck' },
   { id: 'moving', name: 'Mudanças', group: 'Operação', synonyms: ['mudança'], slug: 'moving', action: 'route', route: null, icon: 'Truck' },
   { id: 'packages', name: 'Encomendas', group: 'Operação', synonyms: ['pacote', 'correio'], slug: 'package', action: 'route', route: null, icon: 'PackageCheck' },

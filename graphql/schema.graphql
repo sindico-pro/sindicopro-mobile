@@ -489,6 +489,42 @@ type MobileTaskFormOptions {
   canCreate: Boolean!
 }
 
+type MobileOccurrenceResponse {
+  id: ID!
+  content: String!
+  fromManager: Boolean!
+  authorName: String!
+  fileUrls: [String!]!
+  createdAt: DateTime!
+}
+
+type MobileOccurrenceDetail {
+  id: ID!
+  title: String!
+  description: String!
+  status: String!
+  occurredAt: DateTime
+  authorName: String!
+  fileUrls: [String!]!
+  responses: [MobileOccurrenceResponse!]!
+  canRespond: Boolean!
+  canClose: Boolean!
+}
+
+type MobileRealizationDetail {
+  id: ID!
+  title: String!
+  description: String!
+  heldIn: DateTime
+  photoUrls: [String!]!
+  beforePhotoUrls: [String!]!
+  canCreate: Boolean!
+}
+
+type MobileWriteAccess {
+  canCreate: Boolean!
+}
+
 type AnonymousReportResponseViewModel {
   id: ID!
   report_id: String!
@@ -1858,6 +1894,11 @@ type Query {
   mobileTaskList(condoId: String!, status: MobileTaskStatus!, due: MobileTaskDue, mine: Boolean, limit: Int, offset: Int): [MobileTaskListItem!]!
   mobileTask(id: String!): MobileTaskDetail!
   mobileTaskFormOptions(condoId: String!): MobileTaskFormOptions!
+  mobileOccurrenceAccess(condoId: String!): MobileWriteAccess!
+  mobileOccurrence(id: String!): MobileOccurrenceDetail!
+  mobileRealizationAccess(condoId: String!): MobileWriteAccess!
+  mobileRealizations(condoId: String!, limit: Int, offset: Int): [MobileRealizationItem!]!
+  mobileRealization(id: String!): MobileRealizationDetail!
   mobileMe: MobileSessionPerson!
 }
 
@@ -2159,6 +2200,10 @@ type Mutation {
   mobileAddTaskPhotos(id: String!, kind: MobileTaskPhotoKind!, urls: [String!]!): MobileTaskDetail!
   mobileRemoveTaskPhoto(id: String!, url: String!): MobileTaskDetail!
   mobileCreateTask(data: MobileCreateTaskInput!): MobileTaskDetail!
+  mobileCreateOccurrence(data: MobileCreateOccurrenceInput!): MobileOccurrenceDetail!
+  mobileRespondOccurrence(id: String!, content: String!, fileUrls: [String!]): MobileOccurrenceDetail!
+  mobileCloseOccurrence(id: String!): MobileOccurrenceDetail!
+  mobileCreateRealization(data: MobileCreateRealizationInput!): MobileRealizationDetail!
   createMobileSession(data: CreateAuthInput!): MobileAuth!
   refreshMobileSession(data: RefreshTokenClientSideInput!): MobileTokens!
   revokeMobileSession(refreshToken: String!): Boolean!
@@ -3695,4 +3740,21 @@ input MobileCreateTaskInput {
   dueDate: DateTime
   responsibleId: String
   photoUrls: [String!]
+}
+
+input MobileCreateOccurrenceInput {
+  condoId: String!
+  title: String!
+  description: String!
+  occurredAt: DateTime!
+  fileUrls: [String!]
+}
+
+input MobileCreateRealizationInput {
+  condoId: String!
+  title: String!
+  description: String!
+  heldIn: DateTime!
+  photoUrls: [String!]!
+  beforePhotoUrls: [String!]
 }

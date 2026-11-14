@@ -3,11 +3,11 @@ import * as ImagePicker from 'expo-image-picker'
 
 import { getAuthBridge } from '@/lib/graphql/auth-bridge'
 import { AppError } from '@/lib/graphql/errors'
-import { getGraphqlUrl, getKanbanBucket } from '@/lib/env'
+import { getGraphqlUrl } from '@/lib/env'
 
 export type PickedPhoto = { uri: string; width?: number }
 
-export function taskUploadEndpoint(graphqlUrl: string, userId: string) {
+export function uploadEndpoint(graphqlUrl: string, userId: string) {
   const endpoint = new URL(graphqlUrl)
   const base = endpoint.pathname.replace(/\/graphql\/?$/, '')
   endpoint.pathname = `${base}/upload/${encodeURIComponent(userId)}`
@@ -16,14 +16,14 @@ export function taskUploadEndpoint(graphqlUrl: string, userId: string) {
   return endpoint.toString()
 }
 
-export async function compressTaskPhoto(uri: string) {
+export async function compressPhoto(uri: string) {
   const context = ImageManipulator.manipulate(uri, { maxWidth: 1600 })
   const image = await context.renderAsync()
   const saved = await image.saveAsync({ compress: 0.7, format: SaveFormat.JPEG })
   return saved.uri
 }
 
-export async function pickTaskPhoto(source: 'camera' | 'library'): Promise<PickedPhoto | null> {
+export async function pickPhoto(source: 'camera' | 'library'): Promise<PickedPhoto | null> {
   const permission =
     source === 'camera'
       ? await ImagePicker.requestCameraPermissionsAsync()
@@ -45,19 +45,21 @@ export async function pickTaskPhoto(source: 'camera' | 'library'): Promise<Picke
   return { uri: asset.uri, width: asset.width }
 }
 
-export function uploadTaskPhoto(input: {
+export function uploadPhoto(input: {
   userId: string
   condoId: string
   uri: string
+  bucket: string
+  folderPath: string
   onProgress?: (ratio: number) => void
 }) {
-  const endpoint = taskUploadEndpoint(getGraphqlUrl(), input.userId)
+  const endpoint = uploadEndpoint(getGraphqlUrl(), input.userId)
   const token = getAuthBridge()?.getAccessToken()
   const body = new FormData()
-  body.append('file', { uri: input.uri, name: 'tarefa.jpg', type: 'image/jpeg' } as unknown as Blob)
-  body.append('bucket', getKanbanBucket())
+  body.append('file', { uri: input.uri, name: 'foto.jpg', type: 'image/jpeg' } as unknown as Blob)
+  body.append('bucket', input.bucket)
   body.append('condoId', input.condoId)
-  body.append('folderPath', 'tasks')
+  body.append('folderPath', input.folderPath)
 
   return new Promise<string>((resolve, reject) => {
     const xhr = new XMLHttpRequest()
@@ -85,4 +87,27 @@ export function uploadTaskPhoto(input: {
     if (token) xhr.setRequestHeader('Authorization', `Bearer ${token}`)
     xhr.send(body)
   })
+}
+
+export async function uploadPhotos(input: {
+  userId: string
+  condoId: string
+  uris: string[]
+  bucket: string
+  folderPath: string
+}) {
+  const urls: string[] = []
+  for (const uri of input.uris) {
+    const compressed = await compressPhoto(uri)
+    urls.push(
+      await uploadPhoto({
+        userId: input.userId,
+        condoId: input.condoId,
+        uri: compressed,
+        bucket: input.bucket,
+        folderPath: input.folderPath,
+      }),
+    )
+  }
+  return urls
 }

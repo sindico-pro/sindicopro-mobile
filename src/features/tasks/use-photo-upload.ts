@@ -2,7 +2,7 @@ import { useState } from 'react'
 
 import type { PhotoKind } from './api/tasks-api'
 import { useTaskActions } from './use-task-actions'
-import { pickTaskPhoto } from './upload-task-photo'
+import { pickPhoto } from '@/lib/upload-photo'
 import { errorMessage } from '@/lib/graphql/errors'
 
 export type PhotoJob = {
@@ -52,7 +52,7 @@ export function usePhotoUpload(condoId: string | null, taskId: string | null) {
 
   async function pick(kind: PhotoKind, source: 'camera' | 'library') {
     try {
-      const photo = await pickTaskPhoto(source)
+      const photo = await pickPhoto(source)
       if (!photo) return null
       await send(kind, photo.uri)
       return null

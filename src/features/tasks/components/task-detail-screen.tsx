@@ -15,15 +15,15 @@ import { Fonts, Radius, Spacing } from '@/constants/theme'
 import { useSession } from '@/features/auth/session/session-provider'
 import { useSelectedCondo } from '@/features/condo/use-selected-condo'
 import type { PhotoKind, TaskDetail } from '@/features/tasks/api/tasks-api'
-import { ChoiceSheet } from '@/features/tasks/components/choice-sheet'
-import { PhotoViewer } from '@/features/tasks/components/photo-viewer'
+import { ChoiceSheet } from '@/components/ui/choice-sheet'
+import { PhotoViewer } from '@/components/ui/photo-viewer'
 import { SuccessMark } from '@/features/tasks/components/success-mark'
 import { duePhrase, priorityView, taskStatuses, statusLabel, type TaskStatus } from '@/features/tasks/due-phrase'
 import { PhotoSection, WorkSteps } from '@/features/tasks/components/work-steps'
 import { useTaskActions } from '@/features/tasks/use-task-actions'
 import { photoPickMessage, usePhotoUpload } from '@/features/tasks/use-photo-upload'
 import { useTask } from '@/features/tasks/use-task'
-import { pickTaskPhoto } from '@/features/tasks/upload-task-photo'
+import { pickPhoto } from '@/lib/upload-photo'
 import { formatWhen } from '@/lib/format-date'
 import { errorMessage } from '@/lib/graphql/errors'
 import { useTheme } from '@/hooks/use-theme'
@@ -104,7 +104,7 @@ export function TaskDetailScreen() {
     let photoUri: string | undefined
     if (takePhoto) {
       try {
-        const picked = await pickTaskPhoto('camera')
+        const picked = await pickPhoto('camera')
         if (!picked) return
         photoUri = picked.uri
       } catch (error) {
@@ -122,7 +122,7 @@ export function TaskDetailScreen() {
     let photoUri: string | undefined
     if (takePhoto) {
       try {
-        const picked = await pickTaskPhoto('camera')
+        const picked = await pickPhoto('camera')
         if (!picked) return
         photoUri = picked.uri
       } catch (error) {

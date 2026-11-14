@@ -1,6 +1,6 @@
 import { createTaskSchema } from '@/features/tasks/create-task-schema'
 import { dueDateForChoice, duePhrase, taskDue } from '@/features/tasks/due-phrase'
-import { taskUploadEndpoint } from '@/features/tasks/upload-task-photo'
+import { uploadEndpoint } from '@/lib/upload-photo'
 
 const tuesday = new Date('2026-10-27T15:00:00.000Z')
 
@@ -41,7 +41,7 @@ describe('prazo da tarefa', () => {
   })
 
   it('aponta o upload para a mesma origem do GraphQL', () => {
-    expect(taskUploadEndpoint('http://10.0.2.2:7400/graphql', 'user 1')).toBe(
+    expect(uploadEndpoint('http://10.0.2.2:7400/graphql', 'user 1')).toBe(
       'http://10.0.2.2:7400/upload/user%201',
     )
   })
